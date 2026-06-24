@@ -1,0 +1,52 @@
+Contoso Electronics Troubleshooting Guide
+
+Common Issues and Solutions:
+
+== Contoso Hub ==
+Problem: Hub not connecting to Wi-Fi
+Solution: 
+1. Ensure your router supports 2.4GHz (Hub does not support 5GHz-only networks)
+2. Move Hub within 30 feet of router
+3. Factory reset: Hold power button for 15 seconds until LED flashes red
+4. Re-run setup in the Contoso Home app
+
+Problem: Voice commands not recognized
+Solution:
+1. Check microphone is not muted (top LED should be green)
+2. Speak clearly within 15 feet of the Hub
+3. Update firmware via Contoso Home app > Settings > Device Updates
+
+== Contoso Watch Pro ==
+Problem: Battery draining quickly
+Solution:
+1. Disable always-on display (Settings > Display > Always On > Off)
+2. Reduce GPS tracking frequency (Settings > Activity > GPS > Battery Saver)
+3. Turn off continuous heart rate monitoring if not needed
+4. Ensure latest firmware is installed
+
+Problem: Heart rate sensor inaccurate
+Solution:
+1. Wear watch snugly 1 finger-width above wrist bone
+2. Clean sensor with soft cloth
+3. Ensure no tattoos or hair blocking sensor
+4. Restart watch if readings seem stuck
+
+== Contoso Buds ==
+Problem: One earbud not charging
+Solution:
+1. Clean charging contacts with dry cotton swab
+2. Ensure earbud is properly seated in case (should click)
+3. Reset: Place both buds in case, hold case button 10 seconds
+4. If issue persists, contact support for warranty replacement
+
+Problem: Audio cutting out
+Solution:
+1. Ensure phone Bluetooth is on and within 30 feet
+2. Remove other Bluetooth devices that may interfere
+3. Reset Bluetooth pairing: Forget device, re-pair from scratch
+4. Update firmware via Contoso Audio app
+
+== General Tips ==
+- Always keep firmware updated for best performance
+- Register products at contoso.com/register for warranty activation
+- Join Contoso Community forums for tips from other users

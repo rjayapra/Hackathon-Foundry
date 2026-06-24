@@ -1,0 +1,41 @@
+Contoso Electronics Support Policy
+
+Support Tiers:
+1. Basic (Free with purchase): 
+   - Email support only
+   - 48-hour response time
+   - Access to online knowledge base and community forums
+   - Software updates included
+
+2. Premium ($9.99/month):
+   - Phone + email support
+   - 4-hour response time during business hours
+   - Priority queue for repairs
+   - Extended software support
+   - Remote diagnostics
+
+3. Enterprise (Custom pricing - contact sales):
+   - Dedicated support engineer
+   - 1-hour SLA for critical issues
+   - On-site support available
+   - Custom integration assistance
+   - Quarterly business reviews
+
+Warranty Coverage:
+- Hardware defects: Full replacement within warranty period
+- Software issues: Free updates and patches for 2 years from purchase
+- Battery degradation: Replacement if capacity drops below 80% within 1 year
+- Accidental damage: NOT covered under standard warranty (see Contoso Care+ insurance)
+
+Return Policy:
+- 30 days from purchase date for full refund
+- Product must be in original packaging with all accessories
+- Opened software and digital downloads are non-refundable
+- Restocking fee of 15% applies to opened electronics returned after 14 days
+- Defective items can be returned at any time within warranty period
+
+Contact Information:
+- Phone: 1-800-CONTOSO (available Mon-Fri, 8AM-8PM EST)
+- Email: support@contoso.com
+- Chat: Available 24/7 on contoso.com
+- Retail locations: Visit contoso.com/stores for nearest location

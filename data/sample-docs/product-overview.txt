@@ -1,0 +1,20 @@
+Contoso Electronics Product Overview
+
+Contoso Electronics is a leader in consumer electronics, offering innovative products across multiple categories:
+
+Smart Home Devices:
+- Contoso Hub: Central smart home controller with voice activation, supports 200+ device integrations. Price: $149.99
+- Contoso Thermostat: AI-powered climate control that learns your preferences. Saves up to 30% on energy bills. Price: $89.99
+- Contoso Camera: 4K security camera with AI motion detection, night vision, and 30-day cloud storage. Price: $129.99
+
+Wearables:
+- Contoso Watch Pro: Premium smartwatch with health monitoring (ECG, SpO2, sleep tracking), 5-day battery. Price: $349.99
+- Contoso Band: Fitness tracker with GPS, heart rate monitoring, and swim-proof design. Price: $79.99
+
+Audio:
+- Contoso Buds: True wireless earbuds with active noise cancellation, 8-hour battery life. Price: $149.99
+- Contoso Speaker Max: Smart speaker with spatial audio, built-in voice assistant. Price: $199.99
+
+All products come with a 2-year warranty and 30-day money-back guarantee.
+Products can be returned to any Contoso retail location or shipped back prepaid.
+Free shipping on all orders over $50.
