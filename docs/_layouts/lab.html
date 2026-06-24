@@ -1,0 +1,23 @@
+---
+layout: default
+---
+
+<style>
+  .nav-links { margin-bottom: 2em; }
+  .nav-links a { margin-right: 1em; font-size: 0.9em; }
+</style>
+
+<div class="nav-links">
+  <a href="{{ '/' | relative_url }}">← Home</a>
+  {% if page.prev_lab %}<a href="{{ page.prev_lab | relative_url }}">← Previous Lab</a>{% endif %}
+  {% if page.next_lab %}<a href="{{ page.next_lab | relative_url }}" style="float:right">Next Lab →</a>{% endif %}
+</div>
+
+{{ content }}
+
+<hr>
+<div class="nav-links">
+  <a href="{{ '/' | relative_url }}">← Home</a>
+  {% if page.prev_lab %}<a href="{{ page.prev_lab | relative_url }}">← Previous Lab</a>{% endif %}
+  {% if page.next_lab %}<a href="{{ page.next_lab | relative_url }}" style="float:right">Next Lab →</a>{% endif %}
+</div>

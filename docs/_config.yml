@@ -1,0 +1,23 @@
+title: "Azure AI Foundry Hackathon"
+description: "Hands-on workshop — From zero to deploying an intelligent AI assistant"
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+show_downloads: false
+
+nav:
+  - title: Home
+    url: /
+  - title: "Lab 1: Overview"
+    url: /labs/01-foundry-overview
+  - title: "Lab 2: Tooling"
+    url: /labs/02-tooling-setup
+  - title: "Lab 3: Models & Agents"
+    url: /labs/03-models-and-agents
+  - title: "Lab 4: RAG"
+    url: /labs/04-rag
+  - title: "Lab 5: Prompts"
+    url: /labs/05-prompt-engineering
+  - title: "Lab 6: Assistant Demo"
+    url: /labs/06-sample-assistant
