@@ -49,6 +49,118 @@ LLM:  "According to your policy document, refunds are available within 30 days..
 
 ## 🖥️ Hands-On: Build a RAG Pipeline
 
+### 🌐 Option A: Set Up RAG via the Azure & Foundry Portals (No Code)
+
+> This is the fastest way to get RAG working — using the portal UI to create a search index, upload documents, and chat with your data.
+
+---
+
+#### Step 1: Create an Azure AI Search Resource
+
+1. Go to the [Azure Portal](https://portal.azure.com)
+2. Click **+ Create a resource** → search for **"Azure AI Search"**
+3. Click **Create** and fill in:
+   - **Subscription**: Your subscription
+   - **Resource group**: Your hackathon resource group
+   - **Service name**: `hackathon-search-<yourname>` (must be globally unique)
+   - **Location**: Same region as your Foundry resource
+   - **Pricing tier**: **Free** (for hackathon) or **Basic** (for production)
+4. Click **Review + Create** → **Create**
+5. Wait for deployment to complete (~2 minutes)
+
+#### Step 2: Create a Storage Account & Upload Documents
+
+1. In the Azure Portal, go to **+ Create a resource** → **Storage account**
+2. Create with settings:
+   - **Name**: `hackathonstorage<yourname>`
+   - **Region**: Same as above
+   - **Performance**: Standard
+   - **Redundancy**: LRS (cheapest)
+3. Click **Create**
+4. Once created, go to the storage account → **Containers** → **+ Container**
+   - **Name**: `documents`
+   - **Access level**: Private
+5. Open the `documents` container → **Upload**
+6. Upload all files from `data/sample-docs/`:
+   - `product-overview.txt`
+   - `support-policy.txt`
+   - `troubleshooting-guide.txt`
+
+#### Step 3: Create a Search Index from Your Documents (Import Data Wizard)
+
+1. Go to your **Azure AI Search** resource in the Azure Portal
+2. Click **Import data** (top toolbar)
+3. **Data Source**:
+   - **Data source type**: Azure Blob Storage
+   - **Connection string**: Click "Choose an existing connection" → select your storage account → `documents` container
+   - Click **Next: Add cognitive skills (Optional)** → skip or add if desired
+4. **Customize target index**:
+   - Index name: `hackathon-index`
+   - Ensure **content** field is `Searchable`, `Retrievable`
+   - Click **Next**
+5. **Create an indexer**:
+   - Indexer name: `hackathon-indexer`
+   - Schedule: **Once**
+   - Click **Submit**
+6. Wait 1-2 minutes for indexing to complete
+7. Verify: Go to **Indexes** → `hackathon-index` → **Search explorer** → search `*` → see your documents
+
+#### Step 4: Add Vector Search (Embeddings) to Your Index
+
+1. In the Azure Portal, go to your **Azure AI Search** resource
+2. Click **Indexes** → your `hackathon-index` → **Edit JSON** (or delete and recreate)
+3. **Alternative (easier):** Use the **Foundry Portal** method below instead
+
+**Via Foundry Portal (Recommended for Vector/Hybrid Search):**
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Indexes** (under "Data + indexes") in the left nav
+3. Click **+ New index**
+4. **Data source**: Select **Azure Blob Storage**
+   - Connect to your storage account → `documents` container
+5. **Index configuration**:
+   - **Index name**: `hackathon-vector-index`
+   - **Search type**: Select **Hybrid (vector + keyword)** ✅
+   - **Embedding model**: Select your deployed `text-embedding-3-large` (or `text-embedding-3-small`)
+   - **Chunk size**: 512 tokens (default is fine)
+   - **Chunk overlap**: 128 tokens
+6. Click **Create**
+7. Wait for indexing to complete (progress shown in the portal)
+
+> 💡 The Foundry portal automatically handles chunking, embedding generation, and vector field creation — no code needed!
+
+#### Step 5: Chat with Your Data in the Playground
+
+1. In the Foundry portal, go to **Playgrounds** → **Chat**
+2. Select your deployed GPT-4.1 model
+3. Click **Add your data** (or the "📎 Add data source" button)
+4. Configure:
+   - **Data source**: Azure AI Search
+   - **Index**: Select `hackathon-vector-index` (the one you just created)
+   - **Search type**: Hybrid (vector + keyword)
+   - **Authentication**: System-assigned managed identity (or API key)
+5. Click **Save**
+6. Now ask questions — the model will answer grounded in your documents:
+   - *"What is Contoso's return policy?"*
+   - *"How do I fix my Contoso Buds not charging?"*
+   - *"What support tier includes phone support?"*
+7. Notice the **citations** — the playground shows which document chunks were used!
+
+#### Step 6: Configure Grounding Settings
+
+In the Chat Playground with data attached:
+1. Click **Settings** (gear icon) for your data source
+2. Adjust:
+   - **Strictness**: How strictly the model sticks to retrieved content (1-5, higher = stricter)
+   - **Top-K results**: Number of chunks to retrieve (3-5 is typical)
+   - **Search type**: Try switching between Keyword, Vector, and Hybrid to compare results
+3. Test the same questions with different settings to see the difference
+
+---
+
+### 🐍 Option B: Build RAG with Python (Code-First)
+
+> For developers who want full control over the RAG pipeline.
+
 ### Step 1: Prepare Sample Documents
 
 Create a folder `data/sample-docs/` with some text files. Here's sample content:

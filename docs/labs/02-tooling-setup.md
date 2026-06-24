@@ -4,6 +4,7 @@ title: "Lab 2: Tooling & Setup"
 prev_lab: /labs/01-foundry-overview
 next_lab: /labs/03-models-and-agents
 ---
+
 # Lab 2: Tooling & Setup
 
 ## 🎯 Learning Objectives

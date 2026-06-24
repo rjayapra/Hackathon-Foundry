@@ -4,6 +4,7 @@ title: "Lab 6: Sample Assistant"
 prev_lab: /labs/05-prompt-engineering
 next_lab:
 ---
+
 # Lab 6: Demo — Build & Deploy a Complete AI Assistant
 
 ## 🎯 Learning Objectives
@@ -47,7 +48,89 @@ A **Customer Support Assistant** for "Contoso Electronics" that:
 
 ---
 
-## 🖥️ Hands-On: Build the Assistant
+## 🌐 Option A: Build the Assistant via Foundry Portal (No Code)
+
+> You can create a fully functional RAG-powered assistant entirely in the portal — perfect for demos and rapid prototyping.
+
+### Portal Step 1: Create the Agent
+
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Agents** → **+ New agent**
+3. Configure:
+   - **Name**: `Contoso Support Assistant`
+   - **Model**: GPT-4.1
+   - **Instructions**:
+     ```
+     You are the Contoso Electronics AI Assistant. Help customers with product 
+     questions, support inquiries, and troubleshooting.
+     
+     RULES:
+     1. Answer based ONLY on the provided knowledge base documents.
+     2. If you don't have the answer, suggest contacting support.
+     3. Be friendly, professional, and concise.
+     4. For support issues, classify priority (low/medium/high/critical).
+     5. Always cite your sources.
+     ```
+
+### Portal Step 2: Connect Your Knowledge Base (RAG)
+
+1. In the agent configuration, scroll to **Tools**
+2. Click **+ Add tool** → **File Search**
+3. Click **+ Add data source** → **Azure AI Search**
+4. Configure:
+   - **Search resource**: Select your Azure AI Search
+   - **Index**: Select `hackathon-vector-index` (created in Lab 4)
+   - **Search type**: Hybrid (vector + keyword)
+   - **Authentication**: Managed Identity or API Key
+5. Click **Save**
+
+> 💡 **Alternative — Upload files directly:**
+> - Click **+ Add data source** → **Upload files**
+> - Drag & drop your sample docs (product-overview.txt, support-policy.txt, troubleshooting-guide.txt)
+> - Foundry will automatically chunk, embed, and index them!
+
+### Portal Step 3: Add Code Interpreter Tool
+
+1. Still in the Tools section, click **+ Add tool** → **Code Interpreter**
+2. This allows the agent to execute Python for data analysis, chart generation, etc.
+
+### Portal Step 4: Test the Assistant in the Playground
+
+1. Click **Try in playground** (or the chat panel)
+2. Test with these questions:
+   - *"What products does Contoso offer?"* → Should cite product-overview.txt
+   - *"My Contoso Buds won't charge, what should I do?"* → Should cite troubleshooting-guide.txt
+   - *"I was charged twice for my order!"* → Should classify as high-priority billing issue
+   - *"Create a chart showing product prices"* → Should use Code Interpreter
+3. Verify responses cite the correct source documents
+
+### Portal Step 5: Deploy as a Web App
+
+1. In the Foundry portal, with your agent open, click **Deploy** (top toolbar)
+2. Select **Deploy to a web app**
+3. Configure:
+   - **Name**: `contoso-assistant-app`
+   - **Subscription**: Your subscription
+   - **Resource group**: Your hackathon RG
+   - **Location**: Same region
+   - **Pricing plan**: Basic (B1)
+4. Click **Deploy**
+5. Wait 3-5 minutes for deployment
+6. Once complete, you'll get a URL like: `https://contoso-assistant-app.azurewebsites.net`
+7. Open the URL — you'll see a chat interface powered by your agent!
+
+### Portal Step 6: Configure Authentication (Optional)
+
+1. In the deployed web app settings (Azure Portal → App Service):
+   - **Authentication**: Enable Entra ID (for internal-only access)
+   - Or leave it open for the hackathon demo
+2. Share the URL with your team to test!
+
+---
+
+## 🐍 Option B: Build the Assistant with Code (Streamlit)
+
+> For full customization and control over the UI and RAG logic.
 
 ### Step 1: Create the Assistant Backend
 

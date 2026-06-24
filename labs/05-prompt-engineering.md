@@ -35,7 +35,70 @@ By the end of this lab, you will:
 
 ---
 
-## 🖥️ Hands-On: Prompt Techniques
+## 🌐 Hands-On: Prompt Engineering in the Foundry Playground (No Code)
+
+> The Foundry Playground is the best place to iterate on prompts before writing code.
+
+### Exercise: Prompt Iteration in the Portal
+
+#### Step 1: Open the Chat Playground
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Playgrounds** → **Chat**
+3. Select your deployed **GPT-4.1** model
+
+#### Step 2: Practice System Messages
+1. In the **System message** box, paste:
+   ```
+   You are a senior Python code reviewer. Review code for:
+   1. Type safety and type hints
+   2. Error handling
+   3. Documentation (docstrings)
+   4. PEP 8 compliance
+   
+   Rate each category: ✅ Good, ⚠️ Needs improvement, ❌ Missing
+   Then provide the improved version.
+   ```
+2. In the chat, type: `Review this code: def add(a,b): return a+b`
+3. Observe the structured, detailed response
+4. Now **clear the system message** and ask the same question — notice the difference!
+
+#### Step 3: Experiment with Parameters
+1. On the right panel, adjust:
+   - **Temperature**: Try `0.0` (deterministic) vs `1.0` (creative) — ask "Write a tagline for an AI hackathon" with each
+   - **Max tokens**: Set to `50` and see how responses get truncated
+   - **Top-P**: Try `0.1` for very focused output
+2. For data extraction tasks, always use **Temperature = 0**
+
+#### Step 4: Test JSON Mode in the Playground
+1. In the **System message**, paste:
+   ```
+   Extract product info from the user's text. Return ONLY a JSON object with fields:
+   product_name, brand, price, key_features (array)
+   ```
+2. Under **Response format** (in the settings panel), select **JSON**
+3. Ask: `"The new Surface Pro 10 by Microsoft, Intel Core Ultra 7, 16GB RAM, starts at $1,599"`
+4. The response will be guaranteed valid JSON!
+
+#### Step 5: Compare Prompt Strategies
+Try these different system messages for the **same user input** and compare results:
+
+| Strategy | System Message |
+|----------|---------------|
+| **Zero-shot** | `"Extract the person's name, age, and location from the text."` |
+| **With format** | `"Extract info as JSON: {name, age, location}"` |
+| **With example** | `"Extract info. Example input: 'John, 30, lives in NYC' → {\"name\":\"John\",\"age\":30,\"location\":\"NYC\"}"` |
+
+User input: `"My name is Sarah Chen, I'm 28 years old and I work in Seattle."`
+
+#### Step 6: Save Prompts as Prompt Templates
+1. Once you have a prompt you like, click **Save** (top toolbar)
+2. Give it a name: `code-reviewer-v1`
+3. You can version and share prompts with your team
+4. These saved prompts can be accessed via the SDK later
+
+---
+
+## 🐍 Hands-On: Prompt Techniques with Code
 
 ### Technique 1: Role-Based System Messages
 

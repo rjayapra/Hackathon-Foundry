@@ -4,6 +4,7 @@ title: "Lab 3: Models & Agents"
 prev_lab: /labs/02-tooling-setup
 next_lab: /labs/04-rag
 ---
+
 # Lab 3: Model Usage & Agents
 
 ## 🎯 Learning Objectives
@@ -142,6 +143,54 @@ User Query
 
 ## 🖥️ Hands-On: Building Your First Agent
 
+### 🌐 Option A: Create an Agent via the Foundry Portal (No Code)
+
+> This approach is ideal for quickly prototyping and testing agents without writing code.
+
+#### Step 1: Open the Agent Builder
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Agents** in the left navigation
+3. Click **+ New agent**
+
+#### Step 2: Configure the Agent
+1. **Name**: `HackathonHelper`
+2. **Model**: Select your deployed GPT-4.1 (or GPT-4.1-mini)
+3. **Instructions** (paste into the System message box):
+   ```
+   You are a helpful hackathon assistant for Azure AI Foundry.
+   Your capabilities:
+   - Explain Azure AI concepts clearly
+   - Provide Python code examples
+   - Help debug common issues
+   - Suggest best practices
+   Keep responses concise and practical. Always include code when relevant.
+   ```
+
+#### Step 3: Add Tools
+1. In the **Tools** section, click **+ Add tool**
+2. Select **Code Interpreter** — enables the agent to execute Python code
+3. (Optional) Select **File Search** — enables RAG over uploaded files
+
+#### Step 4: Test the Agent
+1. Click **Try in playground** (or the chat panel on the right)
+2. Ask: *"What's the difference between an embedding and a completion model?"*
+3. Observe the agent reasoning and responding
+4. Try: *"Write Python code to generate embeddings using Azure OpenAI"* — the agent will use Code Interpreter
+
+#### Step 5: Upload Files for File Search (Optional)
+1. In the agent config, under **File Search**, click **+ Add data source**
+2. Upload the sample documents from `data/sample-docs/`
+3. The agent will now answer questions grounded in your documents
+
+#### Step 6: Save & Deploy
+1. Click **Save** to save your agent configuration
+2. Note the **Agent ID** — you'll use this if calling from code later
+3. You can share the agent with teammates via the portal
+
+---
+
+### 🐍 Option B: Create an Agent via Python SDK
+
 ### Exercise 3: Basic Agent with Azure AI Foundry
 
 ```python
@@ -236,7 +285,35 @@ run = client.agents.create_and_process_run(
 
 AI models can generate architecture diagrams in multiple ways:
 
-### Method 1: Generate Mermaid Diagrams with GPT-4.1
+### 🌐 Method 0: Generate Diagrams in the Foundry Playground (No Code)
+
+> The fastest way to create architecture diagrams — use the Chat Playground directly.
+
+1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
+2. Select your **GPT-4.1** deployment
+3. Set the **System message**:
+   ```
+   You are an expert cloud architect. When asked to create architecture diagrams, 
+   output them in Mermaid syntax using proper graph notation. Use subgraphs to 
+   group related components. Add descriptive labels on all connections.
+   ```
+4. In the chat, ask:
+   ```
+   Create an architecture diagram for a RAG-powered chatbot with:
+   - React frontend on Azure Static Web Apps
+   - Python API on Azure Container Apps
+   - Azure AI Foundry for LLM inference
+   - Azure AI Search for vector search
+   - Azure Blob Storage for documents
+   - Azure Cosmos DB for chat history
+   ```
+5. Copy the Mermaid code from the response
+6. Paste it into [mermaid.live](https://mermaid.live) to see the visual diagram
+7. Export as PNG/SVG for your presentations
+
+> 💡 **Pro tip:** Install the **Mermaid Preview** extension in VS Code to render diagrams directly in your editor.
+
+### 🐍 Method 1: Generate Mermaid Diagrams with GPT-4.1
 
 ```python
 response = client.chat.completions.create(

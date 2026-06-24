@@ -4,6 +4,7 @@ title: "Lab 1: Foundry Overview"
 prev_lab: /
 next_lab: /labs/02-tooling-setup
 ---
+
 # Lab 1: Azure AI Foundry Overview
 
 ## 🎯 Learning Objectives
