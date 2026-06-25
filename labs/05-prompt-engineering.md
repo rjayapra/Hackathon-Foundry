@@ -10,6 +10,29 @@ By the end of this lab, you will:
 
 ---
 
+## 📑 Table of Contents
+
+| # | Exercise | Type |
+|---|----------|------|
+| 1 | [Prompt Engineering Fundamentals](#prompt-engineering-fundamentals) | Concepts |
+| 2 | [Prompt Iteration in the Portal — System Messages](#step-2-practice-system-messages) | 🌐 Portal |
+| 3 | [Prompt Iteration in the Portal — Parameters](#step-3-experiment-with-parameters) | 🌐 Portal |
+| 4 | [Prompt Iteration in the Portal — JSON Mode](#step-4-test-json-mode-in-the-playground) | 🌐 Portal |
+| 5 | [Prompt Iteration in the Portal — Compare Strategies](#step-5-compare-prompt-strategies) | 🌐 Portal |
+| 6 | [Prompt Iteration in the Portal — Save Templates](#step-6-save-prompts-as-prompt-templates) | 🌐 Portal |
+| 7 | [Technique 1: Role-Based System Messages](#technique-1-role-based-system-messages) | 🐍 Code |
+| 8 | [Technique 2: Few-Shot Learning](#technique-2-few-shot-learning) | 🐍 Code |
+| 9 | [Technique 3: Chain-of-Thought Prompting](#technique-3-chain-of-thought-prompting) | 🐍 Code |
+| 10 | [Structured Outputs — Portal](#-portal-option-structured-outputs-in-the-playground) | 🌐 Portal |
+| 11 | [Structured Outputs — JSON Mode (Code)](#method-1-json-mode-simple) | 🐍 Code |
+| 12 | [Structured Outputs — JSON Schema (Code)](#method-2-structured-outputs-with-json-schema-production-grade) | 🐍 Code |
+| 13 | [Pattern 1: Classification + Extraction](#pattern-1-classification--extraction) | 🐍 Code |
+| 14 | [Pattern 2: Multi-Step Processing Pipeline](#pattern-2-multi-step-processing-pipeline) | 🐍 Code |
+| 15 | [Best Practices Reference](#-prompt-engineering-best-practices) | Reference |
+| 16 | [🧪 Challenge: Document Intelligence Pipeline](#-challenge-exercise) | Challenge |
+
+---
+
 ## Prompt Engineering Fundamentals
 
 ### The Anatomy of a Good Prompt
@@ -207,6 +230,62 @@ When building applications, you need **reliable, parseable** responses — not f
 | **Prompt instruction only** | ~80% | Quick prototyping |
 | **JSON mode** | ~95% | Most applications |
 | **Structured Outputs (schema)** | ~99.9% | Production systems |
+
+---
+
+### 🌐 Portal Option: Structured Outputs in the Playground
+
+> You can test JSON mode and structured outputs directly in the portal before writing code.
+
+#### Test JSON Mode
+
+1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
+2. Select your **GPT-4.1** deployment
+3. Set the **System message**:
+   ```
+   Extract meeting details and return as JSON with fields:
+   - title (string)
+   - date (ISO 8601)
+   - attendees (array of strings)
+   - action_items (array of objects with 'task' and 'owner')
+   ```
+4. In the **Settings** panel (right side), find **Response format** → select **JSON**
+5. In chat, type:
+   ```
+   Meeting notes: The quarterly review was held on March 15, 2026. 
+   Attendees: Sarah Chen, Mike Johnson, and Lisa Park. 
+   Action items: Sarah will update the roadmap by March 20. 
+   Mike needs to review the budget proposal.
+   ```
+6. The response will be guaranteed valid JSON!
+
+#### Test Ticket Classification
+
+1. Clear the chat and update the **System message**:
+   ```
+   You are a support ticket classifier. Analyze tickets and return JSON with:
+   category (billing/technical/feature_request/general), priority (low/medium/high/critical),
+   sentiment (positive/neutral/negative), summary, suggested_action
+   ```
+2. Keep **Response format** set to **JSON**
+3. Paste this ticket:
+   ```
+   URGENT - I was charged 3 times for my Contoso Watch Pro!! 
+   Order #CNT-2026-78432. Fix this TODAY or I'm canceling!
+   - Sarah Mitchell
+   ```
+4. Observe the structured classification output
+5. Try different tickets and compare the consistency
+
+#### Compare: JSON vs. No JSON Mode
+
+1. **With JSON mode ON**: The response is always valid JSON — no extra text
+2. **Turn JSON mode OFF** (set Response format back to **Text**): The model may include explanations, markdown, or inconsistent formatting
+3. This demonstrates why JSON mode matters for production applications
+
+---
+
+### 🐍 Code Option: Structured Outputs
 
 ### Method 1: JSON Mode (Simple)
 

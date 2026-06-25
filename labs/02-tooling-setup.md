@@ -10,6 +10,22 @@ By the end of this lab, you will:
 
 ---
 
+## 📑 Table of Contents
+
+| # | Exercise | Type |
+|---|----------|------|
+| 1 | [SDK Ecosystem Overview](#sdk-ecosystem-overview) | Concepts |
+| 2 | [Step 1: Install Required Tools](#step-1-install-required-tools) | 🐍 CLI |
+| 3 | [Step 2: Create Project Directory](#step-2-create-project-directory) | 🐍 CLI |
+| 4 | [Step 3: Install Python Packages](#step-3-install-python-packages) | 🐍 CLI |
+| 5 | [Step 4: Configure Environment Variables](#step-4-configure-environment-variables) | 🐍 CLI / 🌐 Portal |
+| 6 | [First API Call — Portal Option](#-option-a-first-api-call-in-the-playground-no-code) | 🌐 Portal |
+| 7 | [First API Call — Code Option](#-option-b-first-api-call-with-code) | 🐍 Code |
+| 8 | [Azure CLI for Foundry](#️-azure-cli-for-foundry) | 🐍 CLI |
+| 9 | [Authentication Methods Comparison](#-authentication-methods-comparison) | Reference |
+
+---
+
 ## SDK Ecosystem Overview
 
 Azure AI Foundry provides multiple SDKs for different scenarios:
@@ -97,6 +113,34 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o
 ---
 
 ## 🖥️ Hands-On: First API Call
+
+### 🌐 Option A: First API Call in the Playground (No Code)
+
+> Perfect if you want to verify your setup is working before writing any code.
+
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Playgrounds** → **Chat**
+3. Select your deployed model (e.g., **GPT-4.1** or **GPT-4.1-mini**)
+4. In the **System message** box, type:
+   ```
+   You are a helpful assistant.
+   ```
+5. In the chat input, type:
+   ```
+   What is Azure AI Foundry? Explain in 2 sentences.
+   ```
+6. Press **Send** and observe the response
+7. On the right panel, note the **token usage** — this is what you'll be billed for
+8. Try adjusting:
+   - **Temperature**: `0.0` vs `1.0` — notice the difference in creativity
+   - **Max response**: Set to `50` — see how the response gets cut short
+   - **Top-P**: `0.1` for very focused output
+
+> ✅ If you see a response, your Foundry setup is working! You can proceed with either portal or code path from here.
+
+---
+
+### 🐍 Option B: First API Call with Code
 
 ### Step 5: Hello Foundry — Using the OpenAI SDK
 

@@ -17,6 +17,23 @@ By the end of this lab, you will:
 
 ---
 
+## 📑 Table of Contents
+
+| # | Exercise | Type |
+|---|----------|------|
+| 1 | [Model Catalog Overview](#model-catalog-overview) | Concepts |
+| 2 | [Exercise 1: Experiment with Temperature](#exercise-1-experiment-with-temperature) | 🌐 Portal / 🐍 Code |
+| 3 | [Exercise 2: Streaming Responses](#exercise-2-streaming-responses) | 🌐 Portal / 🐍 Code |
+| 4 | [What is an Agent?](#what-is-an-agent) | Concepts |
+| 5 | [Build Your First Agent — Portal](#-option-a-create-an-agent-via-the-foundry-portal-no-code) | 🌐 Portal |
+| 6 | [Build Your First Agent — Code](#-option-b-create-an-agent-via-python-sdk) | 🐍 Code |
+| 7 | [Exercise 4: Agent with Code Interpreter](#exercise-4-agent-with-code-interpreter-tool) | 🌐 Portal / 🐍 Code |
+| 8 | [Architecture Diagram Generation — Portal](#-method-0-generate-diagrams-in-the-foundry-playground-no-code) | 🌐 Portal |
+| 9 | [Architecture Diagram Generation — Code](#-method-1-generate-mermaid-diagrams-with-gpt-41) | 🐍 Code |
+| 10 | [🧪 Challenge: Architecture Advisor](#-challenge-exercise) | Challenge |
+
+---
+
 ## Model Catalog Overview
 
 ### Popular Models for Different Tasks (June 2026)
@@ -56,6 +73,20 @@ Need long documents (>128K)?    → GPT-4.1 (1M token context)
 
 ### Exercise 1: Experiment with Temperature
 
+#### 🌐 Portal Option
+
+1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
+2. Select your **GPT-4.1** deployment
+3. In the chat, type: *"Write a one-line tagline for an AI hackathon."*
+4. On the right panel, set **Temperature** to `0.0` → press Send
+5. **Clear chat**, ask the same question with Temperature `0.5` → Send
+6. **Clear chat**, ask the same question with Temperature `1.0` → Send
+7. Compare the three responses — notice how higher temperature = more creative/varied output
+
+> 💡 **Key insight**: Temperature `0.0` gives the same answer every time. Temperature `1.0` is different each time.
+
+#### 🐍 Code Option
+
 ```python
 import os
 from dotenv import load_dotenv
@@ -83,6 +114,18 @@ for temp in [0.0, 0.5, 1.0]:
 ```
 
 ### Exercise 2: Streaming Responses
+
+#### 🌐 Portal Option
+
+1. In the **Chat Playground**, the Foundry portal streams responses by default!
+2. Ask a longer question: *"Explain microservices architecture in 5 bullet points."*
+3. Watch the tokens appear one by one — this is streaming in action
+4. In a real application, streaming gives users faster perceived response times
+5. Toggle **Stream response** in the settings panel to compare streaming vs. non-streaming
+
+> 💡 **Key insight**: Streaming shows partial results immediately. Without streaming, users wait for the full response.
+
+#### 🐍 Code Option
 
 ```python
 # Streaming — get tokens as they're generated (great for chat UIs)
@@ -249,6 +292,23 @@ print("\n🧹 Agent cleaned up.")
 ```
 
 ### Exercise 4: Agent with Code Interpreter Tool
+
+#### 🌐 Portal Option
+
+1. In the Foundry portal, go to **Agents** → open the agent you created in Option A (or create a new one)
+2. Ensure **Code Interpreter** is enabled in the Tools section
+3. In the agent chat, ask:
+   ```
+   Create a bar chart showing these quarterly sales:
+   Q1: $45,000  Q2: $52,000  Q3: $48,000  Q4: $61,000
+   Save it as a PNG file.
+   ```
+4. The agent will write and execute Python code, then display the chart inline!
+5. You can download the generated PNG from the chat
+
+> 💡 The agent can also analyze uploaded files. Try uploading a CSV and asking it to summarize the data.
+
+#### 🐍 Code Option
 
 ```python
 # Create an agent that can execute Python code

@@ -17,6 +17,26 @@ By the end of this lab, you will:
 
 ---
 
+## 📑 Table of Contents
+
+| # | Exercise | Type |
+|---|----------|------|
+| 1 | [What We're Building](#what-were-building) | Concepts |
+| 2 | [Portal Step 1: Create the Agent](#portal-step-1-create-the-agent) | 🌐 Portal |
+| 3 | [Portal Step 2: Connect Knowledge Base (RAG)](#portal-step-2-connect-your-knowledge-base-rag) | 🌐 Portal |
+| 4 | [Portal Step 3: Add Code Interpreter](#portal-step-3-add-code-interpreter-tool) | 🌐 Portal |
+| 5 | [Portal Step 4: Test the Assistant](#portal-step-4-test-the-assistant-in-the-playground) | 🌐 Portal |
+| 6 | [Portal Step 5: Deploy as Web App](#portal-step-5-deploy-as-a-web-app) | 🌐 Portal |
+| 7 | [Portal Step 6: Configure Auth](#portal-step-6-configure-authentication-optional) | 🌐 Portal |
+| 8 | [Code Step 1: Create Streamlit Backend](#step-1-create-the-assistant-backend) | 🐍 Code |
+| 9 | [Code Step 2: Run Locally](#step-2-run-the-assistant-locally) | 🐍 Code |
+| 10 | [Deploy to Azure Container Apps](#option-a-deploy-to-azure-container-apps-recommended) | 🐍 CLI |
+| 11 | [Deploy to Azure App Service](#option-b-deploy-to-azure-app-service) | 🐍 CLI |
+| 12 | [End-to-End Summary](#-end-to-end-walkthrough-summary) | Reference |
+| 13 | [🧪 Final Challenge: Extend the Assistant](#-final-challenge-extend-the-assistant) | Challenge |
+
+---
+
 ## What We're Building
 
 A **Customer Support Assistant** for "Contoso Electronics" that:

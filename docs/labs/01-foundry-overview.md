@@ -17,6 +17,21 @@ By the end of this lab, you will:
 
 ---
 
+## 📑 Table of Contents
+
+| # | Exercise | Type |
+|---|----------|------|
+| 1 | [What is Azure AI Foundry?](#what-is-azure-ai-foundry) | Concepts |
+| 2 | [Core Concepts](#core-concepts) | Concepts |
+| 3 | [Step 1: Access the Portal](#step-1-access-the-portal) | 🌐 Portal |
+| 4 | [Step 2: Explore the Model Catalog](#step-2-explore-the-model-catalog) | 🌐 Portal |
+| 5 | [Step 3: Create or Open a Project](#step-3-create-or-open-a-project) | 🌐 Portal |
+| 6 | [Step 4: Deploy a Model](#step-4-deploy-a-model) | 🌐 Portal |
+| 7 | [Step 5: Test in the Playground](#step-5-test-in-the-playground) | 🌐 Portal |
+| 8 | [Key Endpoints](#-key-endpoints-youll-use) | Reference |
+
+---
+
 ## What is Azure AI Foundry?
 
 Azure AI Foundry is Microsoft's **unified, enterprise-grade platform** for designing, building, deploying, and governing AI applications and agents at scale.

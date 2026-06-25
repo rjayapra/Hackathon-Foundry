@@ -17,6 +17,27 @@ By the end of this lab, you will:
 
 ---
 
+## 📑 Table of Contents
+
+| # | Exercise | Type |
+|---|----------|------|
+| 1 | [What is RAG?](#what-is-rag) | Concepts |
+| 2 | [Step 1: Create Azure AI Search Resource](#step-1-create-an-azure-ai-search-resource) | 🌐 Portal |
+| 3 | [Step 2: Create Storage & Upload Documents](#step-2-create-a-storage-account--upload-documents) | 🌐 Portal |
+| 4 | [Step 3: Create Search Index (Import Data Wizard)](#step-3-create-a-search-index-from-your-documents-import-data-wizard) | 🌐 Portal |
+| 5 | [Step 4: Add Vector Search / Embeddings](#step-4-add-vector-search-embeddings-to-your-index) | 🌐 Portal |
+| 6 | [Step 5: Chat with Your Data in Playground](#step-5-chat-with-your-data-in-the-playground) | 🌐 Portal |
+| 7 | [Step 6: Configure Grounding Settings](#step-6-configure-grounding-settings) | 🌐 Portal |
+| 8 | [RAG with Code — Prepare Documents](#step-1-prepare-sample-documents) | 🐍 Code |
+| 9 | [RAG with Code — Create Embeddings](#step-2-upload-documents-and-create-embeddings) | 🐍 Code |
+| 10 | [RAG with Code — Chunk & Embed](#step-3-chunk-documents-and-generate-embeddings) | 🐍 Code |
+| 11 | [RAG with Code — Upload to Search](#step-4-upload-to-azure-ai-search) | 🐍 Code |
+| 12 | [RAG with Code — Query Pipeline](#step-5-query-with-rag) | 🐍 Code |
+| 13 | [Search Strategies Comparison](#-search-strategies-comparison) | Reference |
+| 14 | [🧪 Challenge Exercise](#-challenge-exercise) | Challenge |
+
+---
+
 ## What is RAG?
 
 **RAG (Retrieval-Augmented Generation)** solves a fundamental LLM limitation: models only know what they were trained on. RAG lets you inject your own data at query time.
