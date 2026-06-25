@@ -26,7 +26,7 @@ By the end of this lab, you will:
 | 3 | [Portal Step 2: Connect Knowledge Base (RAG)](#portal-step-2-connect-your-knowledge-base-rag) | 🌐 Portal |
 | 4 | [Portal Step 3: Add Code Interpreter](#portal-step-3-add-code-interpreter-tool) | 🌐 Portal |
 | 5 | [Portal Step 4: Test the Assistant](#portal-step-4-test-the-assistant-in-the-playground) | 🌐 Portal |
-| 6 | [Portal Step 5: Deploy as Web App](#portal-step-5-deploy-as-a-web-app) | 🌐 Portal |
+| 6 | [Portal Step 5: Deploy as Web App (via Code)](#portal-step-5-deploy-as-a-web-app-via-code) | 🐍 CLI |
 | 7 | [Portal Step 6: Configure Auth](#portal-step-6-configure-authentication-optional) | 🌐 Portal |
 | 8 | [Code Step 1: Create Streamlit Backend](#step-1-create-the-assistant-backend) | 🐍 Code |
 | 9 | [Code Step 2: Run Locally](#step-2-run-the-assistant-locally) | 🐍 Code |
@@ -124,27 +124,103 @@ A **Customer Support Assistant** for "Contoso Electronics" that:
    - *"Create a chart showing product prices"* → Should use Code Interpreter
 3. Verify responses cite the correct source documents
 
-### Portal Step 5: Deploy as a Web App
+### Portal Step 5: Deploy as a Web App (via Code)
 
-1. In the Foundry portal, with your agent open, click **Deploy** (top toolbar)
-2. Select **Deploy to a web app**
-3. Configure:
-   - **Name**: `contoso-assistant-app`
-   - **Subscription**: Your subscription
-   - **Resource group**: Your hackathon RG
-   - **Location**: Same region
-   - **Pricing plan**: Basic (B1)
-4. Click **Deploy**
-5. Wait 3-5 minutes for deployment
-6. Once complete, you'll get a URL like: `https://contoso-assistant-app.azurewebsites.net`
-7. Open the URL — you'll see a chat interface powered by your agent!
+> ⚠️ **Note:** The "Deploy to a web app" button is no longer available in the new Foundry portal. Deployment must be done through code using the Azure CLI. The steps below guide you through deploying your agent as a web app.
+
+1. **Get your Agent ID** from the Foundry portal:
+   - Go to **Agents** → click your agent → copy the **Agent ID** from the overview panel
+
+2. **Create a minimal web app** that calls your agent. Create a file `app.py`:
+
+   ```python
+   import os
+   import streamlit as st
+   from azure.identity import DefaultAzureCredential
+   from azure.ai.projects import AIProjectsClient
+
+   # Configuration
+   PROJECT_ENDPOINT = os.getenv("PROJECT_ENDPOINT")
+   AGENT_ID = os.getenv("AGENT_ID")  # The agent you created in the portal
+
+   credential = DefaultAzureCredential()
+   client = AIProjectsClient(endpoint=PROJECT_ENDPOINT, credential=credential)
+
+   st.title("🤖 Contoso Electronics Assistant")
+
+   if "thread_id" not in st.session_state:
+       thread = client.threads.create(agent_id=AGENT_ID)
+       st.session_state.thread_id = thread.id
+
+   # Display chat history
+   if "messages" not in st.session_state:
+       st.session_state.messages = []
+
+   for msg in st.session_state.messages:
+       st.chat_message(msg["role"]).markdown(msg["content"])
+
+   if prompt := st.chat_input("Ask me anything..."):
+       st.session_state.messages.append({"role": "user", "content": prompt})
+       st.chat_message("user").markdown(prompt)
+
+       # Post message to thread
+       client.messages.create(
+           thread_id=st.session_state.thread_id, role="user", content=prompt
+       )
+
+       # Run the agent
+       run = client.runs.create_and_process(thread_id=st.session_state.thread_id)
+
+       if run.status == "completed":
+           responses = client.messages.list(thread_id=st.session_state.thread_id)
+           for resp in responses:
+               if resp.role == "assistant":
+                   answer = resp.content[0].text.value
+                   st.session_state.messages.append({"role": "assistant", "content": answer})
+                   st.chat_message("assistant").markdown(answer)
+                   break
+   ```
+
+3. **Deploy to Azure Container Apps** using the CLI:
+
+   ```bash
+   # Create a resource group
+   az group create --name rg-hackathon --location eastus2
+
+   # Create Container Apps environment
+   az containerapp env create \
+     --name hackathon-env \
+     --resource-group rg-hackathon \
+     --location eastus2
+
+   # Deploy directly from code (no Dockerfile needed)
+   az containerapp up \
+     --name contoso-assistant \
+     --resource-group rg-hackathon \
+     --environment hackathon-env \
+     --source . \
+     --ingress external \
+     --target-port 8501 \
+     --env-vars \
+       PROJECT_ENDPOINT="<your-project-endpoint>" \
+       AGENT_ID="<your-agent-id>"
+
+   # Get the URL
+   az containerapp show \
+     --name contoso-assistant \
+     --resource-group rg-hackathon \
+     --query properties.configuration.ingress.fqdn -o tsv
+   ```
+
+4. Open the URL — your portal-configured agent is now live as a web app!
 
 ### Portal Step 6: Configure Authentication (Optional)
 
-1. In the deployed web app settings (Azure Portal → App Service):
-   - **Authentication**: Enable Entra ID (for internal-only access)
-   - Or leave it open for the hackathon demo
-2. Share the URL with your team to test!
+1. In the Azure Portal, go to your Container App → **Authentication**
+2. Click **Add identity provider** → select **Microsoft Entra ID**
+3. This restricts access to your organization only
+4. Or leave it open for the hackathon demo
+5. Share the URL with your team to test!
 
 ---
 
