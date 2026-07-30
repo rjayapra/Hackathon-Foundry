@@ -18,7 +18,7 @@ client = AzureOpenAI(
 
 # Make a chat completion call
 response = client.chat.completions.create(
-    model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o"),
+    model=os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1"),
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is Azure AI Foundry? Explain in 3 sentences."}

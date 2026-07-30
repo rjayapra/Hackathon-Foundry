@@ -15,8 +15,8 @@ By the end of this lab, you will:
 | # | Exercise | Type |
 |---|----------|------|
 | 1 | [Model Catalog Overview](#model-catalog-overview) | Concepts |
-| 2 | [Exercise 1: Experiment with Temperature](#exercise-1-experiment-with-temperature) | 🌐 Portal / 🐍 Code |
-| 3 | [Exercise 2: Streaming Responses](#exercise-2-streaming-responses) | 🌐 Portal / 🐍 Code |
+| 2 | [Exercise 1: Experiment with Reasoning Effort](#exercise-1-experiment-with-reasoning-effort) | 🌐 Portal / 🐍 Code |
+| 3 | [Exercise 2: Streaming Responses](#exercise-2-streaming-responses) | 🐍 API |
 | 4 | [What is an Agent?](#what-is-an-agent) | Concepts |
 | 5 | [Build Your First Agent — Portal](#-option-a-create-an-agent-via-the-foundry-portal-no-code) | 🌐 Portal |
 | 6 | [Build Your First Agent — Code](#-option-b-create-an-agent-via-python-sdk) | 🐍 Code |
@@ -36,7 +36,7 @@ By the end of this lab, you will:
 | **GPT-4.1** | Complex reasoning, coding, long-context | 1M tokens | SOTA coding & instruction-following, fine-tunable |
 | **GPT-4.1-mini** | Cost-effective general tasks | 1M tokens | Fast, affordable, great quality |
 | **GPT-4.1-nano** | Ultra-low-latency, edge scenarios | 1M tokens | Smallest/fastest in the 4.1 family |
-| **GPT-4o** | Multimodal (text + image + audio) | 128K tokens | Real-time audio, vision, fastest multimodal |
+| **gpt-5.1** | Multimodal (text + image + audio) | 128K tokens | Real-time audio, vision, fastest multimodal |
 | **o3** | Advanced math, logic, planning | 200K tokens | Deep chain-of-thought reasoning |
 | **o4-mini** | Visual reasoning, cost-efficient reasoning | 200K tokens | Strong reasoning at lower cost |
 | **gpt-image-1** | Image generation & editing | — | Text-to-image, inpainting, style transfer |
@@ -49,39 +49,42 @@ By the end of this lab, you will:
 ### Choosing a Model — Decision Matrix
 
 ```
-Need complex reasoning/coding?  → GPT-4.1
-Need it cheap & fast?           → GPT-4.1-mini or GPT-4.1-nano
-Need multimodal (vision+audio)? → GPT-4o
-Need deep math/logic reasoning? → o3 or o4-mini
+Need complex reasoning/coding?  → GPT-5.1
+Need it cheap & fast?           → GPT-5-mini 
+Need multimodal (vision+audio)? → gpt-5.1
+Need deep math/logic reasoning? → o4-mini
 Need image generation?          → gpt-image-1
 Need embeddings for RAG?        → text-embedding-3-large (quality) or 3-small (cost)
-Need code generation?           → GPT-4.1 (1M context, best for code)
-Need diagram/visual?            → GPT-4.1 (Mermaid/PlantUML) + gpt-image-1
-Need long documents (>128K)?    → GPT-4.1 (1M token context)
+Need code generation?           → GPT-5-codex (1M context, best for code)
+Need diagram/visual?            → GPT-5.1 (Mermaid/PlantUML) + gpt-image-1
+Need long documents (>128K)?    → GPT-5.1 (1M token context)
 ```
 
 ---
 
 ## 🖥️ Hands-On: API Parameters Deep Dive
 
-### Exercise 1: Experiment with Temperature
+### Exercise 1: Experiment with Reasoning Effort
+
+> ⚠️ **GPT-5.1 does not support the `temperature` parameter.** Use `reasoning_effort` to control how much reasoning the model performs before answering.
 
 #### 🌐 Portal Option
 
 1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
-2. Select your **GPT-4.1** deployment
-3. In the chat, type: *"Write a one-line tagline for an AI hackathon."*
-4. On the right panel, set **Temperature** to `0.0` → press Send
-5. **Clear chat**, ask the same question with Temperature `0.5` → Send
-6. **Clear chat**, ask the same question with Temperature `1.0` → Send
-7. Compare the three responses — notice how higher temperature = more creative/varied output
+2. Select your **GPT-5.1** deployment
+3. In the chat, type: *"A team has 8 hours to build an AI prototype. Prioritize these tasks and explain the tradeoffs: data preparation, prompt design, evaluation, UI, and deployment."*
+4. On the right panel, set **Reasoning effort** to `none` → press Send
+5. **Clear chat**, ask the same question with Reasoning effort `low` → Send
+6. **Clear chat**, ask the same question with Reasoning effort `high` → Send
+7. Compare the responses, response times, and token usage
 
-> 💡 **Key insight**: Temperature `0.0` gives the same answer every time. Temperature `1.0` is different each time.
+> 💡 **Key insight**: Higher reasoning effort can improve analysis on complex tasks, but it can also increase latency and token usage. Use the lowest effort that consistently meets your quality requirements.
 
 #### 🐍 Code Option
 
 ```python
 import os
+import time
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 
@@ -93,32 +96,32 @@ client = AzureOpenAI(
     api_version="2025-04-01-preview"
 )
 
-prompt = "Write a one-line tagline for an AI hackathon."
+prompt = """A team has 8 hours to build an AI prototype. Prioritize these tasks
+and explain the tradeoffs: data preparation, prompt design, evaluation, UI,
+and deployment."""
 
-# Try different temperatures
-for temp in [0.0, 0.5, 1.0]:
+# Try different reasoning effort levels supported by GPT-5.1
+for effort in ["none", "low", "high"]:
+    start = time.perf_counter()
     response = client.chat.completions.create(
         model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
         messages=[{"role": "user", "content": prompt}],
-        temperature=temp,
-        max_tokens=50
+        reasoning_effort=effort,
+        max_completion_tokens=500
     )
-    print(f"Temperature {temp}: {response.choices[0].message.content}")
+    elapsed = time.perf_counter() - start
+
+    print(f"\nReasoning effort: {effort}")
+    print(f"Elapsed time: {elapsed:.2f} seconds")
+    print(f"Token usage: {response.usage}")
+    print(response.choices[0].message.content)
 ```
 
 ### Exercise 2: Streaming Responses
 
-#### 🌐 Portal Option
+> ⚠️ **Streaming is an API feature and is not available as an option in the Foundry playground.** Complete this exercise with the Python API.
 
-1. In the **Chat Playground**, the Foundry portal streams responses by default!
-2. Ask a longer question: *"Explain microservices architecture in 5 bullet points."*
-3. Watch the tokens appear one by one — this is streaming in action
-4. In a real application, streaming gives users faster perceived response times
-5. Toggle **Stream response** in the settings panel to compare streaming vs. non-streaming
-
-> 💡 **Key insight**: Streaming shows partial results immediately. Without streaming, users wait for the full response.
-
-#### 🐍 Code Option
+#### 🐍 Python API
 
 ```python
 # Streaming — get tokens as they're generated (great for chat UIs)
@@ -137,6 +140,14 @@ for chunk in stream:
         print(chunk.choices[0].delta.content, end="", flush=True)
 print()
 ```
+
+1. Run the code and observe that text appears incrementally instead of all at once.
+2. Change `stream=True` to `stream=False`. Update the code to print
+   `response.choices[0].message.content`, then run it again.
+3. Compare the perceived response time. With streaming, the application can display
+   content before the complete response is ready.
+
+> 💡 **Key insight**: The API returns an iterator of response chunks when `stream=True`. Production applications can forward those chunks to a UI as they arrive.
 
 ---
 
@@ -157,7 +168,7 @@ User Query
     │
     ▼
 ┌─────────────────┐
-│   Agent Brain   │ ← LLM (GPT-4o)
+│   Agent Brain   │ ← LLM (gpt-5.1)
 │  (Reasoning)    │
 └────────┬────────┘
          │
@@ -247,7 +258,7 @@ client = AIProjectClient(
 
 # Step 1: Create an Agent
 agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="HackathonHelper",
     instructions="""You are a helpful hackathon assistant. You help developers 
     understand Azure AI services and write code. Be concise and practical.
@@ -306,7 +317,7 @@ print("\n🧹 Agent cleaned up.")
 ```python
 # Create an agent that can execute Python code
 agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="DataAnalyst",
     instructions="You are a data analyst. Use code interpreter to analyze data and create visualizations.",
     tools=[{"type": "code_interpreter"}]
@@ -338,19 +349,37 @@ run = client.agents.create_and_process_run(
 
 AI models can generate architecture diagrams in multiple ways:
 
-### 🌐 Method 0: Generate Diagrams in the Foundry Playground (No Code)
+### 🌐 Method 0: Generate Diagrams with an Agent (Portal)
 
-> The fastest way to create architecture diagrams — use the Chat Playground directly.
+> Create a dedicated Architecture Diagram agent in the Foundry portal.
 
-1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
-2. Select your **GPT-4.1** deployment
-3. Set the **System message**:
-   ```
-   You are an expert cloud architect. When asked to create architecture diagrams, 
-   output them in Mermaid syntax using proper graph notation. Use subgraphs to 
-   group related components. Add descriptive labels on all connections.
-   ```
-4. In the chat, ask:
+#### Step 1: Create the Diagram Agent
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Agents** → **+ New agent**
+3. Configure:
+   - **Name**: `ArchitectureDiagramGenerator`
+   - **Model**: Select your deployed **GPT-4.1**
+   - **Instructions**:
+     ```
+     You are an expert cloud architect specializing in Azure. When asked to 
+     create architecture diagrams:
+     
+     1. ALWAYS output diagrams in Mermaid syntax inside a ```mermaid code block
+     2. Use 'graph TD' for top-down layouts or 'graph LR' for left-right flows
+     3. Use subgraphs to group related Azure services
+     4. Add descriptive labels on all connections (e.g., "HTTPS", "REST API")
+     5. Include proper Azure service names
+     6. After the diagram, provide a brief explanation of the data flow
+     
+     If asked to generate an image diagram, use Code Interpreter with matplotlib.
+     ```
+
+#### Step 2: Add Code Interpreter Tool
+1. In the **Tools** section, click **+ Add tool** → **Code Interpreter**
+2. This allows the agent to also generate PNG/SVG diagrams using matplotlib
+
+#### Step 3: Test the Agent
+1. In the agent chat panel, ask:
    ```
    Create an architecture diagram for a RAG-powered chatbot with:
    - React frontend on Azure Static Web Apps
@@ -360,11 +389,20 @@ AI models can generate architecture diagrams in multiple ways:
    - Azure Blob Storage for documents
    - Azure Cosmos DB for chat history
    ```
-5. Copy the Mermaid code from the response
-6. Paste it into [mermaid.live](https://mermaid.live) to see the visual diagram
-7. Export as PNG/SVG for your presentations
+2. The agent will output a Mermaid diagram — copy the code
+3. Paste it into [mermaid.live](https://mermaid.live) to see the visual diagram
+4. Export as PNG/SVG for your presentations
 
-> 💡 **Pro tip:** Install the **Mermaid Preview** extension in VS Code to render diagrams directly in your editor.
+#### Step 4: Try Image Generation
+1. Ask the same agent:
+   ```
+   Now create a visual PNG diagram of this same architecture using matplotlib. 
+   Use boxes and arrows with Azure blue colors (#0078D4). Save as PNG.
+   ```
+2. The agent will use Code Interpreter to generate and display the image
+3. Download the PNG directly from the chat
+
+> 💡 **Pro tip:** Install the **Mermaid Preview** extension in VS Code to render `.mmd` files directly in your editor.
 
 ### 🐍 Method 1: Generate Mermaid Diagrams with GPT-4.1
 
@@ -459,7 +497,7 @@ message = client.agents.create_message(
 ```python
 # Starter code for the challenge
 advisor_agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="ArchitectureAdvisor",
     instructions="""You are an Azure Solutions Architect. When given an application 
     description:
@@ -478,7 +516,7 @@ advisor_agent = client.agents.create_agent(
 ## ✅ Checkpoint
 
 Before moving to the next lab, confirm:
-- [ ] You can make API calls with different parameters (temperature, streaming)
+- [ ] You can make API calls with different parameters (reasoning effort, streaming)
 - [ ] You've created and interacted with an agent
 - [ ] You understand tool calling (code interpreter)
 - [ ] You can generate architecture diagrams using GPT-4.1 (Mermaid)

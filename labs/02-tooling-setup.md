@@ -102,7 +102,7 @@ PROJECT_ENDPOINT=https://your-resource.services.ai.azure.com/api/projects/your-p
 # From Azure OpenAI resource > Keys and Endpoint
 AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
 AZURE_OPENAI_API_KEY=your-key-here
-AZURE_OPENAI_DEPLOYMENT=gpt-4o
+AZURE_OPENAI_DEPLOYMENT=gpt-5.1
 ```
 
 > 💡 **Where to find these values:**
@@ -120,7 +120,7 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o
 
 1. Go to [ai.azure.com](https://ai.azure.com) → your project
 2. Click **Playgrounds** → **Chat**
-3. Select your deployed model (e.g., **GPT-4.1** or **GPT-4.1-mini**)
+3. Select your deployed model (e.g., **GPT-5.1** or **GPT-5-mini**)
 4. In the **System message** box, type:
    ```
    You are a helpful assistant.
@@ -130,11 +130,9 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o
    What is Azure AI Foundry? Explain in 2 sentences.
    ```
 6. Press **Send** and observe the response
-7. On the right panel, note the **token usage** — this is what you'll be billed for
+7. Note the **token usage** — this is what you'll be billed for
 8. Try adjusting:
-   - **Temperature**: `0.0` vs `1.0` — notice the difference in creativity
-   - **Max response**: Set to `50` — see how the response gets cut short
-   - **Top-P**: `0.1` for very focused output
+   - **Max Completion response**: Set to `50` — see how the response gets cut short   
 
 > ✅ If you see a response, your Foundry setup is working! You can proceed with either portal or code path from here.
 
@@ -227,8 +225,8 @@ az cognitiveservices account deployment list \
 az cognitiveservices account deployment create \
   --name <resource-name> \
   --resource-group <rg-name> \
-  --deployment-name gpt-4o \
-  --model-name gpt-4o \
+  --deployment-name gpt-5.1 \
+  --model-name gpt-5.1 \
   --model-version "2024-08-06" \
   --model-format OpenAI \
   --sku-capacity 10 \

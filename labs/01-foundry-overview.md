@@ -60,7 +60,7 @@ Azure Subscription
 
 ### 2. Projects
 A **Project** is your workspace within Foundry. It contains:
-- Model deployments (GPT-4o, embeddings, etc.)
+- Model deployments (gpt-5.1, embeddings, etc.)
 - Agents you build
 - Connected data sources (Azure AI Search, Storage, etc.)
 - Evaluation runs
@@ -96,7 +96,7 @@ Models from the catalog are deployed as **endpoints** you can call via API:
    - **Task**: Chat, Completion, Embeddings, Image generation
    - **Provider**: OpenAI, Meta, Microsoft, Mistral
    - **License**: Proprietary vs. Open-source
-3. Click on **GPT-4o** to see its details, pricing, and benchmarks
+3. Click on **gpt-5.1** to see its details, pricing, and benchmarks
 
 ### Step 3: Create or Open a Project
 1. Click **Projects** in the left nav
@@ -108,15 +108,15 @@ Models from the catalog are deployed as **endpoints** you can call via API:
 4. Click **Create**
 
 ### Step 4: Deploy a Model
-1. Inside your project, go to **Deployments**
-2. Click **+ Deploy model** → **Deploy base model**
-3. Select **GPT-4o** (or GPT-4o-mini for cost savings)
-4. Choose deployment type: **Standard**
-5. Set tokens-per-minute (TPM) rate limit (start with 10K for hackathon)
-6. Click **Deploy**
+1. Inside your project, go to **Build** -> **Models**
+2. Under **Deployments**  Click **Deploy base model**
+3. Select **gpt-5.1** (or gpt-5.1-mini for cost savings)
+4. Click **Deploy**
+5. Deploy with **Default Settings**
+
 
 ### Step 5: Test in the Playground
-1. Go to **Playgrounds** → **Chat**
+1. Select the model and go to **Playgrounds** → **Chat**
 2. Select your deployed model
 3. Try a prompt:
    ```
@@ -124,8 +124,7 @@ Models from the catalog are deployed as **endpoints** you can call via API:
    ```
 4. Experiment with:
    - **System message** (persona/instructions)
-   - **Temperature** (creativity: 0 = deterministic, 1 = creative)
-   - **Max tokens** (response length limit)
+   - **Max Completion tokens** (response length limit)
 
 ---
 
@@ -147,7 +146,7 @@ Before moving to the next lab, confirm:
 - [ ] You can access the Foundry portal at ai.azure.com
 - [ ] You've explored the model catalog
 - [ ] You have a project created
-- [ ] You've deployed at least one model (GPT-4o or GPT-4o-mini)
+- [ ] You've deployed at least one model (gpt-5.1 or gpt-5.1-mini)
 - [ ] You've tested the model in the Playground
 
 ---

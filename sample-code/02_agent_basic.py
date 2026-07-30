@@ -21,7 +21,7 @@ print("🤖 Creating AI Agent...")
 
 # Create an agent with instructions
 agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="HackathonHelper",
     instructions="""You are a helpful hackathon assistant for Azure AI Foundry.
     

@@ -44,7 +44,7 @@ A **Customer Support Assistant** for "Contoso Electronics" that:
 ```
 ┌──────────────┐     ┌─────────────────┐     ┌──────────────────┐
 │   Streamlit  │────▶│  Python Backend  │────▶│  Azure AI Foundry │
-│   Frontend   │◀────│  (FastAPI/Flask) │◀────│  (GPT-4o Agent)   │
+│   Frontend   │◀────│  (FastAPI/Flask) │◀────│  (gpt-5.1 Agent)   │
 └──────────────┘     └────────┬────────┘     └────────┬──────────┘
                               │                        │
                               │                 ┌──────┴──────┐
@@ -245,7 +245,7 @@ load_dotenv()
 # ─── Configuration ───────────────────────────────────────────────
 AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_API_KEY")
-DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
 EMBEDDING_DEPLOYMENT = os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002")
 SEARCH_ENDPOINT = os.getenv("AZURE_SEARCH_ENDPOINT")
 SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
@@ -363,7 +363,7 @@ def main():
     )
     
     st.title("🤖 Contoso Electronics AI Assistant")
-    st.caption("Powered by Azure AI Foundry | RAG-enabled | GPT-4o")
+    st.caption("Powered by Azure AI Foundry | RAG-enabled | gpt-5.1")
     
     # Sidebar with settings
     with st.sidebar:
@@ -506,7 +506,7 @@ az containerapp create \
   --env-vars \
     AZURE_OPENAI_ENDPOINT=<your-endpoint> \
     AZURE_OPENAI_API_KEY=<your-key> \
-    AZURE_OPENAI_DEPLOYMENT=gpt-4o \
+    AZURE_OPENAI_DEPLOYMENT=gpt-5.1 \
     AZURE_SEARCH_ENDPOINT=<your-search-endpoint> \
     AZURE_SEARCH_KEY=<your-search-key> \
     AZURE_SEARCH_INDEX=hackathon-index
@@ -541,7 +541,7 @@ az webapp config appsettings set \
   --settings \
     AZURE_OPENAI_ENDPOINT=<your-endpoint> \
     AZURE_OPENAI_API_KEY=<your-key> \
-    AZURE_OPENAI_DEPLOYMENT=gpt-4o
+    AZURE_OPENAI_DEPLOYMENT=gpt-5.1
 
 # Deploy code
 az webapp up --name contoso-assistant-app --resource-group rg-hackathon

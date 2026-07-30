@@ -18,7 +18,7 @@ client = AzureOpenAI(
     api_version="2024-12-01-preview"
 )
 
-DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
 
 
 # ─── Example 1: Simple JSON Mode ────────────────────────────────

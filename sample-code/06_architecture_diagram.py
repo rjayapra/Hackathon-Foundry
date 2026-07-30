@@ -15,7 +15,7 @@ client = AzureOpenAI(
     api_version="2024-12-01-preview"
 )
 
-DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
 
 
 def generate_mermaid_diagram(description: str) -> str:
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     rag_description = """Create an architecture diagram for a RAG-powered chatbot with:
     - React frontend deployed on Azure Static Web Apps
     - Python FastAPI backend on Azure Container Apps
-    - Azure AI Foundry for LLM inference (GPT-4o)
+    - Azure AI Foundry for LLM inference (gpt-5.1)
     - Azure AI Search for vector search
     - Azure Blob Storage for document storage
     - Azure Cosmos DB for conversation history
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     - Agent orchestrator (Azure AI Foundry Agent Service)
     - Multiple tools: Code Interpreter, Azure AI Search, Custom API
     - Memory store (Azure Cosmos DB)
-    - Model endpoint (GPT-4o)
+    - Model endpoint (gpt-5.1)
     - Evaluation & monitoring layer"""
 
     plantuml = generate_plantuml_diagram(agent_description)

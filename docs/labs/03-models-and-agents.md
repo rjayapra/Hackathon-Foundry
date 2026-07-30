@@ -43,7 +43,7 @@ By the end of this lab, you will:
 | **GPT-4.1** | Complex reasoning, coding, long-context | 1M tokens | SOTA coding & instruction-following, fine-tunable |
 | **GPT-4.1-mini** | Cost-effective general tasks | 1M tokens | Fast, affordable, great quality |
 | **GPT-4.1-nano** | Ultra-low-latency, edge scenarios | 1M tokens | Smallest/fastest in the 4.1 family |
-| **GPT-4o** | Multimodal (text + image + audio) | 128K tokens | Real-time audio, vision, fastest multimodal |
+| **gpt-5.1** | Multimodal (text + image + audio) | 128K tokens | Real-time audio, vision, fastest multimodal |
 | **o3** | Advanced math, logic, planning | 200K tokens | Deep chain-of-thought reasoning |
 | **o4-mini** | Visual reasoning, cost-efficient reasoning | 200K tokens | Strong reasoning at lower cost |
 | **gpt-image-1** | Image generation & editing | — | Text-to-image, inpainting, style transfer |
@@ -58,7 +58,7 @@ By the end of this lab, you will:
 ```
 Need complex reasoning/coding?  → GPT-4.1
 Need it cheap & fast?           → GPT-4.1-mini or GPT-4.1-nano
-Need multimodal (vision+audio)? → GPT-4o
+Need multimodal (vision+audio)? → gpt-5.1
 Need deep math/logic reasoning? → o3 or o4-mini
 Need image generation?          → gpt-image-1
 Need embeddings for RAG?        → text-embedding-3-large (quality) or 3-small (cost)
@@ -164,7 +164,7 @@ User Query
     │
     ▼
 ┌─────────────────┐
-│   Agent Brain   │ ← LLM (GPT-4o)
+│   Agent Brain   │ ← LLM (gpt-5.1)
 │  (Reasoning)    │
 └────────┬────────┘
          │
@@ -254,7 +254,7 @@ client = AIProjectClient(
 
 # Step 1: Create an Agent
 agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="HackathonHelper",
     instructions="""You are a helpful hackathon assistant. You help developers 
     understand Azure AI services and write code. Be concise and practical.
@@ -313,7 +313,7 @@ print("\n🧹 Agent cleaned up.")
 ```python
 # Create an agent that can execute Python code
 agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="DataAnalyst",
     instructions="You are a data analyst. Use code interpreter to analyze data and create visualizations.",
     tools=[{"type": "code_interpreter"}]
@@ -345,19 +345,37 @@ run = client.agents.create_and_process_run(
 
 AI models can generate architecture diagrams in multiple ways:
 
-### 🌐 Method 0: Generate Diagrams in the Foundry Playground (No Code)
+### 🌐 Method 0: Generate Diagrams with an Agent (Portal)
 
-> The fastest way to create architecture diagrams — use the Chat Playground directly.
+> Create a dedicated Architecture Diagram agent in the Foundry portal.
 
-1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
-2. Select your **GPT-4.1** deployment
-3. Set the **System message**:
-   ```
-   You are an expert cloud architect. When asked to create architecture diagrams, 
-   output them in Mermaid syntax using proper graph notation. Use subgraphs to 
-   group related components. Add descriptive labels on all connections.
-   ```
-4. In the chat, ask:
+#### Step 1: Create the Diagram Agent
+1. Go to [ai.azure.com](https://ai.azure.com) → your project
+2. Click **Agents** → **+ New agent**
+3. Configure:
+   - **Name**: `ArchitectureDiagramGenerator`
+   - **Model**: Select your deployed **GPT-4.1**
+   - **Instructions**:
+     ```
+     You are an expert cloud architect specializing in Azure. When asked to 
+     create architecture diagrams:
+     
+     1. ALWAYS output diagrams in Mermaid syntax inside a ```mermaid code block
+     2. Use 'graph TD' for top-down layouts or 'graph LR' for left-right flows
+     3. Use subgraphs to group related Azure services
+     4. Add descriptive labels on all connections (e.g., "HTTPS", "REST API")
+     5. Include proper Azure service names
+     6. After the diagram, provide a brief explanation of the data flow
+     
+     If asked to generate an image diagram, use Code Interpreter with matplotlib.
+     ```
+
+#### Step 2: Add Code Interpreter Tool
+1. In the **Tools** section, click **+ Add tool** → **Code Interpreter**
+2. This allows the agent to also generate PNG/SVG diagrams using matplotlib
+
+#### Step 3: Test the Agent
+1. In the agent chat panel, ask:
    ```
    Create an architecture diagram for a RAG-powered chatbot with:
    - React frontend on Azure Static Web Apps
@@ -367,11 +385,20 @@ AI models can generate architecture diagrams in multiple ways:
    - Azure Blob Storage for documents
    - Azure Cosmos DB for chat history
    ```
-5. Copy the Mermaid code from the response
-6. Paste it into [mermaid.live](https://mermaid.live) to see the visual diagram
-7. Export as PNG/SVG for your presentations
+2. The agent will output a Mermaid diagram — copy the code
+3. Paste it into [mermaid.live](https://mermaid.live) to see the visual diagram
+4. Export as PNG/SVG for your presentations
 
-> 💡 **Pro tip:** Install the **Mermaid Preview** extension in VS Code to render diagrams directly in your editor.
+#### Step 4: Try Image Generation
+1. Ask the same agent:
+   ```
+   Now create a visual PNG diagram of this same architecture using matplotlib. 
+   Use boxes and arrows with Azure blue colors (#0078D4). Save as PNG.
+   ```
+2. The agent will use Code Interpreter to generate and display the image
+3. Download the PNG directly from the chat
+
+> 💡 **Pro tip:** Install the **Mermaid Preview** extension in VS Code to render `.mmd` files directly in your editor.
 
 ### 🐍 Method 1: Generate Mermaid Diagrams with GPT-4.1
 
@@ -466,7 +493,7 @@ message = client.agents.create_message(
 ```python
 # Starter code for the challenge
 advisor_agent = client.agents.create_agent(
-    model="gpt-4o",
+    model="gpt-5.1",
     name="ArchitectureAdvisor",
     instructions="""You are an Azure Solutions Architect. When given an application 
     description:

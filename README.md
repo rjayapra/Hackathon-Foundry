@@ -123,7 +123,7 @@ hackathon-foundry/
 ## 💡 Tips for Hackathon Success
 
 1. **Start with the portal** — explore the UI before writing code
-2. **Use GPT-4o** for complex reasoning tasks, **GPT-4o-mini** for cost-effective testing
+2. **Use gpt-5.1** for complex reasoning tasks, **gpt-5.1-mini** for cost-effective testing
 3. **Test prompts in the playground first** before integrating into code
 4. **Keep your .env file secure** — never commit API keys
 5. **Ask questions!** — The facilitators are here to help

@@ -109,7 +109,7 @@ PROJECT_ENDPOINT=https://your-resource.services.ai.azure.com/api/projects/your-p
 # From Azure OpenAI resource > Keys and Endpoint
 AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
 AZURE_OPENAI_API_KEY=your-key-here
-AZURE_OPENAI_DEPLOYMENT=gpt-4o
+AZURE_OPENAI_DEPLOYMENT=gpt-5.1
 ```
 
 > 💡 **Where to find these values:**
@@ -234,8 +234,8 @@ az cognitiveservices account deployment list \
 az cognitiveservices account deployment create \
   --name <resource-name> \
   --resource-group <rg-name> \
-  --deployment-name gpt-4o \
-  --model-name gpt-4o \
+  --deployment-name gpt-5.1 \
+  --model-name gpt-5.1 \
   --model-version "2024-08-06" \
   --model-format OpenAI \
   --sku-capacity 10 \
