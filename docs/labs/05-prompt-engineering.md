@@ -1,10 +1,3 @@
----
-layout: lab
-title: "Lab 5: Prompt Engineering"
-prev_lab: /labs/04-rag
-next_lab: /labs/06-sample-assistant
----
-
 # Lab 5: Prompt Engineering & Structured Outputs
 
 ## 🎯 Learning Objectives
@@ -502,4 +495,3 @@ Before moving to the next lab, confirm:
 ---
 
 **Next:** [Lab 6 — Demo: Sample Assistant →](06-sample-assistant.md)
-

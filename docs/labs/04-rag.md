@@ -1,10 +1,3 @@
----
-layout: lab
-title: "Lab 4: RAG"
-prev_lab: /labs/03-models-and-agents
-next_lab: /labs/05-prompt-engineering
----
-
 # Lab 4: RAG — Retrieval-Augmented Generation
 
 ## 🎯 Learning Objectives
@@ -12,7 +5,7 @@ next_lab: /labs/05-prompt-engineering
 By the end of this lab, you will:
 - Understand how RAG works and why it matters
 - Create an Azure AI Search index with your documents
-- Generate embeddings for semantic search
+- Generate embeddings for vector and hybrid search
 - Build a complete RAG pipeline that gives grounded answers
 
 ---
@@ -24,10 +17,10 @@ By the end of this lab, you will:
 | 1 | [What is RAG?](#what-is-rag) | Concepts |
 | 2 | [Step 1: Create Azure AI Search Resource](#step-1-create-an-azure-ai-search-resource) | 🌐 Portal |
 | 3 | [Step 2: Create Storage & Upload Documents](#step-2-create-a-storage-account--upload-documents) | 🌐 Portal |
-| 4 | [Step 3: Create Search Index (Import Data Wizard)](#step-3-create-a-search-index-from-your-documents-import-data-wizard) | 🌐 Portal |
-| 5 | [Step 4: Add Vector Search / Embeddings](#step-4-add-vector-search-embeddings-to-your-index) | 🌐 Portal |
-| 6 | [Step 5: Chat with Your Data in Playground](#step-5-chat-with-your-data-in-the-playground) | 🌐 Portal |
-| 7 | [Step 6: Configure Grounding Settings](#step-6-configure-grounding-settings) | 🌐 Portal |
+| 4 | [Step 3: Import and Vectorize Data](#step-3-import-and-vectorize-data-for-rag) | 🌐 Portal |
+| 5 | [Step 4: Validate Retrieval](#step-4-validate-retrieval) | 🌐 Portal |
+| 6 | [Step 5: Create a Foundry IQ Knowledge Base](#step-5-create-a-foundry-iq-knowledge-base) | 🌐 Portal |
+| 7 | [Step 6: Connect and Test an Agent](#step-6-connect-and-test-an-agent) | 🌐 Portal |
 | 8 | [RAG with Code — Prepare Documents](#step-1-prepare-sample-documents) | 🐍 Code |
 | 9 | [RAG with Code — Create Embeddings](#step-2-upload-documents-and-create-embeddings) | 🐍 Code |
 | 10 | [RAG with Code — Chunk & Embed](#step-3-chunk-documents-and-generate-embeddings) | 🐍 Code |
@@ -40,7 +33,7 @@ By the end of this lab, you will:
 
 ## What is RAG?
 
-**RAG (Retrieval-Augmented Generation)** solves a fundamental LLM limitation: models only know what they were trained on. RAG lets you inject your own data at query time.
+**RAG (Retrieval-Augmented Generation)** grounds a model with relevant, current, or private information retrieved at query time. This is especially useful for information that isn't in the model's training data or shouldn't be encoded in the model itself.
 
 ### The Problem Without RAG
 ```
@@ -79,7 +72,8 @@ LLM:  "According to your policy document, refunds are available within 30 days..
 
 ### 🌐 Option A: Set Up RAG via the Azure & Foundry Portals (No Code)
 
-> This is the fastest way to get RAG working — using the portal UI to create a search index, upload documents, and chat with your data.
+> This is the fastest no-code path: create a vectorized search index, expose it
+> through a Foundry IQ knowledge base, and test grounded answers with an agent.
 
 ---
 
@@ -114,74 +108,75 @@ LLM:  "According to your policy document, refunds are available within 30 days..
    - `support-policy.txt`
    - `troubleshooting-guide.txt`
 
-#### Step 3: Create a Search Index from Your Documents (Import Data Wizard)
+#### Step 3: Import and Vectorize Data for RAG
 
-1. Go to your **Azure AI Search** resource in the Azure Portal
-2. Click **Import data** (top toolbar)
-3. **Data Source**:
-   - **Data source type**: Azure Blob Storage
-   - **Connection string**: Click "Choose an existing connection" → select your storage account → `documents` container
-   - Click **Next: Add cognitive skills (Optional)** → skip or add if desired
-4. **Customize target index**:
-   - Index name: `hackathon-index`
-   - Ensure **content** field is `Searchable`, `Retrievable`
-   - Click **Next**
-5. **Create an indexer**:
-   - Indexer name: `hackathon-indexer`
-   - Schedule: **Once**
-   - Click **Submit**
-6. Wait 1-2 minutes for indexing to complete
-7. Verify: Go to **Indexes** → `hackathon-index` → **Search explorer** → search `*` → see your documents
+Use the current Azure AI Search
+[**Import data** wizard](https://learn.microsoft.com/azure/search/search-get-started-portal-import-vectors).
+It creates the data source, skillset, index, vectorizer, and indexer needed for
+integrated vectorization.
 
-#### Step 4: Add Vector Search (Embeddings) to Your Index
-
-1. In the Azure Portal, go to your **Azure AI Search** resource
-2. Click **Indexes** → your `hackathon-index` → **Edit JSON** (or delete and recreate)
-3. **Alternative (easier):** Use the **Foundry Portal** method below instead
-
-**Via Foundry Portal (Recommended for Vector/Hybrid Search):**
-1. Go to [ai.azure.com](https://ai.azure.com) → your project
-2. Click **Indexes** (under "Data + indexes") in the left nav
-3. Click **+ New index**
-4. **Data source**: Select **Azure Blob Storage**
-   - Connect to your storage account → `documents` container
-5. **Index configuration**:
+1. Open your **Azure AI Search** resource in the Azure portal.
+2. On **Overview**, select **Import data**.
+3. Select **Azure Blob Storage**, then select the **RAG** scenario.
+4. Connect to the `documents` container.
+5. Select **Authenticate using managed identity** and keep **System-assigned**.
+   Complete any role-assignment prompts shown by the wizard.
+6. For text vectorization:
+   - Select your Azure OpenAI or Foundry resource.
+   - Select a deployed `text-embedding-3-small` or `text-embedding-3-large` model.
+   - Keep the same embedding deployment for indexing and query-time vectorization.
+7. Configure the index:
    - **Index name**: `hackathon-vector-index`
-   - **Search type**: Select **Hybrid (vector + keyword)** ✅
-   - **Embedding model**: Select your deployed `text-embedding-3-large` (or `text-embedding-3-small`)
-   - **Chunk size**: 512 tokens (default is fine)
-   - **Chunk overlap**: 128 tokens
-6. Click **Create**
-7. Wait for indexing to complete (progress shown in the portal)
+   - Enable semantic ranking if your search tier supports it.
+   - Review the generated chunk, title, source, and vector fields.
+8. Create the objects and wait for the indexer to finish.
 
-> 💡 The Foundry portal automatically handles chunking, embedding generation, and vector field creation — no code needed!
+> 💡 **Integrated vectorization** handles chunking and embedding during indexing and
+> vectorizes text queries with the same model at query time. Schedule the indexer in
+> production so changed documents are picked up automatically.
 
-#### Step 5: Chat with Your Data in the Playground
+#### Step 4: Validate Retrieval
 
-1. In the Foundry portal, go to **Playgrounds** → **Chat**
-2. Select your deployed GPT-4.1 model
-3. Click **Add your data** (or the "📎 Add data source" button)
-4. Configure:
-   - **Data source**: Azure AI Search
-   - **Index**: Select `hackathon-vector-index` (the one you just created)
-   - **Search type**: Hybrid (vector + keyword)
-   - **Authentication**: System-assigned managed identity (or API key)
-5. Click **Save**
-6. Now ask questions — the model will answer grounded in your documents:
+1. Go to **Indexes** → `hackathon-vector-index` → **Search explorer**.
+2. Run `*` to confirm that chunked documents were indexed.
+3. Test these queries:
+   - `return policy`
+   - `Contoso Buds not charging`
+   - `support tier with phone support`
+4. Compare keyword, vector, hybrid, and hybrid with semantic ranking when those
+   options are available.
+5. Confirm that returned chunks contain the source path or title needed for citations.
+
+#### Step 5: Create a Foundry IQ Knowledge Base
+
+> ⚠️ **Azure OpenAI On Your Data is deprecated and retires October 14, 2026.**
+> For new solutions, use
+> [**Foundry IQ**](https://learn.microsoft.com/azure/foundry/agents/concepts/what-is-foundry-iq)
+> with Foundry Agent Service.
+
+1. Go to [Microsoft Foundry](https://ai.azure.com) and turn on **New Foundry**.
+2. Open your project and select **Build**.
+3. On the **Knowledge** tab, connect your Azure AI Search service.
+4. Create a knowledge base and add the indexed Azure AI Search content as a
+   knowledge source.
+5. Configure retrieval behavior. Start with hybrid retrieval and semantic ranking,
+   then tune it against representative questions.
+
+> Foundry IQ can plan and decompose queries, retrieve across one or more knowledge
+> sources, apply ranking, and return grounded results with citations. Some agentic
+> retrieval capabilities remain in preview.
+
+#### Step 6: Connect and Test an Agent
+
+1. On the **Agents** tab, create or open an agent that uses your GPT-5.1 deployment.
+2. Connect the Foundry IQ knowledge base to the agent.
+3. In the playground, ask:
    - *"What is Contoso's return policy?"*
    - *"How do I fix my Contoso Buds not charging?"*
    - *"What support tier includes phone support?"*
-7. Notice the **citations** — the playground shows which document chunks were used!
-
-#### Step 6: Configure Grounding Settings
-
-In the Chat Playground with data attached:
-1. Click **Settings** (gear icon) for your data source
-2. Adjust:
-   - **Strictness**: How strictly the model sticks to retrieved content (1-5, higher = stricter)
-   - **Top-K results**: Number of chunks to retrieve (3-5 is typical)
-   - **Search type**: Try switching between Keyword, Vector, and Hybrid to compare results
-3. Test the same questions with different settings to see the difference
+4. Verify that answers are grounded and include citations.
+5. Ask an out-of-scope question and confirm that the agent says the knowledge base
+   doesn't contain enough information.
 
 ---
 
@@ -228,10 +223,40 @@ Return Policy:
 
 ### Step 2: Upload Documents and Create Embeddings
 
+Install current packages, sign in with Azure CLI, and use Microsoft Entra ID rather
+than storing service keys:
+
+```powershell
+pip install --upgrade openai azure-identity azure-search-documents python-dotenv
+az login
+```
+
+Your identity needs **Cognitive Services OpenAI User** for model inference and
+appropriate Azure AI Search data-plane roles to create the index, upload documents,
+and run queries.
+
+Configure these values in `.env`. Deployment values are deployment names, which
+can differ from model names:
+
+```dotenv
+AZURE_OPENAI_ENDPOINT=https://<resource-name>.openai.azure.com/
+AZURE_OPENAI_DEPLOYMENT=<your-gpt-5.1-deployment>
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT=<your-text-embedding-3-small-deployment>
+AZURE_OPENAI_EMBEDDING_DIMENSIONS=1536
+AZURE_SEARCH_ENDPOINT=https://<search-service-name>.search.windows.net
+AZURE_SEARCH_INDEX=hackathon-vector-index
+```
+
+The code uses the
+[Azure OpenAI v1 API](https://learn.microsoft.com/azure/ai-foundry/openai/api-version-lifecycle),
+which doesn't require a dated `api-version`.
+
 ```python
 import os
+from pathlib import Path
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+from openai import OpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
@@ -248,51 +273,81 @@ from azure.search.documents.indexes.models import (
     SemanticPrioritizedFields,
     SemanticField,
 )
-from azure.core.credentials import AzureKeyCredential
 
 load_dotenv()
 
 # --- Configuration ---
-SEARCH_ENDPOINT = os.getenv("AZURE_SEARCH_ENDPOINT")
-SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
-INDEX_NAME = os.getenv("AZURE_SEARCH_INDEX", "hackathon-index")
+SEARCH_ENDPOINT = os.environ["AZURE_SEARCH_ENDPOINT"]
+INDEX_NAME = os.getenv("AZURE_SEARCH_INDEX", "hackathon-vector-index")
+OPENAI_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"].rstrip("/")
+CHAT_DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
+EMBEDDING_DEPLOYMENT = os.getenv(
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
+    "text-embedding-3-small",
+)
+EMBEDDING_DIMENSIONS = int(os.getenv("AZURE_OPENAI_EMBEDDING_DIMENSIONS", "1536"))
 
-openai_client = AzureOpenAI(
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2024-12-01-preview"
+credential = DefaultAzureCredential()
+token_provider = get_bearer_token_provider(
+    credential,
+    "https://ai.azure.com/.default",
+)
+
+OPENAI_BASE_URL = (
+    f"{OPENAI_ENDPOINT}/"
+    if OPENAI_ENDPOINT.endswith("/openai/v1")
+    else f"{OPENAI_ENDPOINT}/openai/v1/"
+)
+openai_client = OpenAI(
+    base_url=OPENAI_BASE_URL,
+    api_key=token_provider,
 )
 
 # --- Step 2a: Create the Search Index ---
 index_client = SearchIndexClient(
     endpoint=SEARCH_ENDPOINT,
-    credential=AzureKeyCredential(SEARCH_KEY)
+    credential=credential,
 )
 
 # Define index schema with vector field for embeddings
 fields = [
     SimpleField(name="id", type=SearchFieldDataType.String, key=True),
     SearchableField(name="content", type=SearchFieldDataType.String),
-    SearchableField(name="title", type=SearchFieldDataType.String),
+    SearchableField(name="title", type=SearchFieldDataType.String, filterable=True),
+    SimpleField(
+        name="category",
+        type=SearchFieldDataType.String,
+        filterable=True,
+        facetable=True,
+    ),
     SearchField(
         name="content_vector",
         type=SearchFieldDataType.Collection(SearchFieldDataType.Single),
         searchable=True,
-        vector_search_dimensions=1536,
-        vector_search_profile_name="myHnswProfile"
+        retrievable=False,
+        vector_search_dimensions=EMBEDDING_DIMENSIONS,
+        vector_search_profile_name="myHnswProfile",
     ),
 ]
 
 # Configure vector search
 vector_search = VectorSearch(
     algorithms=[HnswAlgorithmConfiguration(name="myHnsw")],
-    profiles=[VectorSearchProfile(name="myHnswProfile", algorithm_configuration_name="myHnsw")]
+    profiles=[
+        VectorSearchProfile(
+            name="myHnswProfile",
+            algorithm_configuration_name="myHnsw",
+        )
+    ],
 )
 
-# Configure semantic search (for hybrid mode)
+# Configure semantic ranking for hybrid queries
 semantic_config = SemanticConfiguration(
     name="my-semantic-config",
-    prioritized_fields=SemanticPrioritizedFields(content_fields=[SemanticField(field_name="content")])
+    prioritized_fields=SemanticPrioritizedFields(
+        title_field=SemanticField(field_name="title"),
+        content_fields=[SemanticField(field_name="content")],
+    ),
 )
 semantic_search = SemanticSearch(configurations=[semantic_config])
 
@@ -301,24 +356,27 @@ index = SearchIndex(
     name=INDEX_NAME,
     fields=fields,
     vector_search=vector_search,
-    semantic_search=semantic_search
+    semantic_search=semantic_search,
 )
 
-index_client.create_or_update_index(index)
+index_client.create_or_update_index(index=index)
 print(f"✅ Index '{INDEX_NAME}' created/updated")
 ```
+
+> `text-embedding-3-small` produces up to 1,536 dimensions and
+> `text-embedding-3-large` produces up to 3,072. The index field dimension must
+> exactly match the dimension returned by your embedding deployment.
 
 ### Step 3: Chunk Documents and Generate Embeddings
 
 ```python
-import glob
-
-def chunk_text(text, chunk_size=500, overlap=50):
-    """Split text into overlapping chunks."""
+def chunk_text(text, chunk_size_words=400, overlap_words=80):
+    """Split text into overlapping word-based chunks for this lab."""
     words = text.split()
     chunks = []
-    for i in range(0, len(words), chunk_size - overlap):
-        chunk = " ".join(words[i:i + chunk_size])
+    step = chunk_size_words - overlap_words
+    for i in range(0, len(words), step):
+        chunk = " ".join(words[i:i + chunk_size_words])
         if chunk:
             chunks.append(chunk)
     return chunks
@@ -326,8 +384,9 @@ def chunk_text(text, chunk_size=500, overlap=50):
 def get_embedding(text):
     """Generate embedding for a text chunk."""
     response = openai_client.embeddings.create(
-        model=os.getenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "text-embedding-ada-002"),
-        input=text
+        model=EMBEDDING_DEPLOYMENT,
+        input=text,
+        dimensions=EMBEDDING_DIMENSIONS,
     )
     return response.data[0].embedding
 
@@ -335,11 +394,9 @@ def get_embedding(text):
 documents = []
 doc_id = 0
 
-for filepath in glob.glob("data/sample-docs/*.txt"):
-    with open(filepath, "r") as f:
-        content = f.read()
-    
-    filename = os.path.basename(filepath)
+for filepath in Path("data/sample-docs").glob("*.txt"):
+    content = filepath.read_text(encoding="utf-8")
+    filename = filepath.name
     chunks = chunk_text(content)
     
     for chunk in chunks:
@@ -347,8 +404,9 @@ for filepath in glob.glob("data/sample-docs/*.txt"):
         documents.append({
             "id": str(doc_id),
             "title": filename,
+            "category": filepath.stem,
             "content": chunk,
-            "content_vector": embedding
+            "content_vector": embedding,
         })
         doc_id += 1
         print(f"  📄 Processed chunk {doc_id} from {filename}")
@@ -363,10 +421,15 @@ print(f"\n✅ Total chunks to index: {len(documents)}")
 search_client = SearchClient(
     endpoint=SEARCH_ENDPOINT,
     index_name=INDEX_NAME,
-    credential=AzureKeyCredential(SEARCH_KEY)
+    credential=credential,
 )
 
 result = search_client.upload_documents(documents)
+failures = [item for item in result if not item.succeeded]
+if failures:
+    details = "; ".join(f"{item.key}: {item.error_message}" for item in failures)
+    raise RuntimeError(f"Failed to upload search documents: {details}")
+
 print(f"✅ Uploaded {len(result)} documents to index '{INDEX_NAME}'")
 ```
 
@@ -384,39 +447,47 @@ def rag_query(question):
     # Step 2: Search the index (hybrid: keyword + vector)
     vector_query = VectorizedQuery(
         vector=question_embedding,
-        k_nearest_neighbors=3,
-        fields="content_vector"
+        k_nearest_neighbors=50,
+        fields="content_vector",
     )
     
     results = search_client.search(
         search_text=question,  # keyword search
         vector_queries=[vector_query],  # vector search
-        select=["title", "content"],
-        top=3
+        query_type="semantic",
+        semantic_configuration_name="my-semantic-config",
+        select=["id", "title", "category", "content"],
+        top=5,
     )
     
-    # Step 3: Collect retrieved context
+    # Step 3: Collect retrieved context with source labels
     context_parts = []
     print("\n📚 Retrieved documents:")
-    for result in results:
-        context_parts.append(result["content"])
-        print(f"  - {result['title']} (score: {result['@search.score']:.2f})")
+    for rank, result in enumerate(results, start=1):
+        source_id = f"S{rank}"
+        context_parts.append(
+            f"[{source_id}] Title: {result['title']}\n{result['content']}"
+        )
+        score = result.get("@search.reranker_score") or result["@search.score"]
+        print(f"  [{source_id}] {result['title']} (score: {score:.2f})")
     
     context = "\n\n---\n\n".join(context_parts)
     
     # Step 4: Generate grounded answer
     response = openai_client.chat.completions.create(
-        model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+        model=CHAT_DEPLOYMENT,
         messages=[
-            {"role": "system", "content": f"""You are a helpful assistant. Answer the user's 
-            question based ONLY on the provided context. If the answer is not in the context, 
-            say "I don't have enough information to answer that."
+            {"role": "developer", "content": f"""Answer the user's question using only
+            the provided context. Cite supporting sources using their labels, such as [S1].
+            If the context doesn't contain the answer, say
+            "I don't have enough information to answer that."
             
             Context:
             {context}"""},
-            {"role": "user", "content": question}
+            {"role": "user", "content": question},
         ],
-        temperature=0.3
+        reasoning_effort="low",
+        max_completion_tokens=800,
     )
     
     return response.choices[0].message.content
@@ -443,10 +514,12 @@ for q in questions:
 |----------|-------------|----------|
 | **Keyword** | Traditional text matching (BM25) | Exact terms, product names |
 | **Vector** | Semantic similarity via embeddings | Natural language, synonyms |
-| **Hybrid** | Both keyword + vector combined | Best overall accuracy ✅ |
-| **Hybrid + Semantic Ranker** | Hybrid + ML re-ranking | Production systems |
+| **Hybrid** | Both keyword + vector combined | Strong general baseline |
+| **Hybrid + Semantic Ranker** | Hybrid + ML re-ranking | Higher relevance when supported |
 
-> **Recommendation**: Always use **Hybrid search** for production RAG pipelines.
+> **Recommendation**: Start with **hybrid search plus semantic ranking**, then
+> benchmark keyword, vector, hybrid, and agentic retrieval against a representative
+> evaluation set. The best configuration depends on your content and query patterns.
 
 ---
 
@@ -454,8 +527,8 @@ for q in questions:
 
 **Extend the RAG pipeline to:**
 1. Add metadata filtering (e.g., search only within "support" documents)
-2. Implement citation tracking — show which document chunks the answer came from
-3. Add a follow-up question capability (conversation memory)
+2. Build a small evaluation set and measure retrieval relevance and citation correctness
+3. Add follow-up question support without allowing conversation history to override retrieved facts
 
 ---
 
@@ -471,4 +544,3 @@ Before moving to the next lab, confirm:
 ---
 
 **Next:** [Lab 5 — Prompt Engineering & Structured Outputs →](05-prompt-engineering.md)
-

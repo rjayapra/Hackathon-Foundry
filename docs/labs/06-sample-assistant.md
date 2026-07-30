@@ -1,10 +1,3 @@
----
-layout: lab
-title: "Lab 6: Sample Assistant"
-prev_lab: /labs/05-prompt-engineering
-next_lab:
----
-
 # Lab 6: Demo — Build & Deploy a Complete AI Assistant
 
 ## 🎯 Learning Objectives
@@ -620,4 +613,3 @@ Congratulations! 🎉 You've completed the hackathon. Verify:
 ---
 
 **🏆 Thank you for participating in the Azure AI Foundry Hackathon!**
-

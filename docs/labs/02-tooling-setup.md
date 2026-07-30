@@ -1,10 +1,3 @@
----
-layout: lab
-title: "Lab 2: Tooling & Setup"
-prev_lab: /labs/01-foundry-overview
-next_lab: /labs/03-models-and-agents
----
-
 # Lab 2: Tooling & Setup
 
 ## 🎯 Learning Objectives
@@ -22,12 +15,12 @@ By the end of this lab, you will:
 | # | Exercise | Type |
 |---|----------|------|
 | 1 | [SDK Ecosystem Overview](#sdk-ecosystem-overview) | Concepts |
-| 2 | [Step 1: Install Required Tools](#step-1-install-required-tools) | 🐍 CLI |
-| 3 | [Step 2: Create Project Directory](#step-2-create-project-directory) | 🐍 CLI |
-| 4 | [Step 3: Install Python Packages](#step-3-install-python-packages) | 🐍 CLI |
-| 5 | [Step 4: Configure Environment Variables](#step-4-configure-environment-variables) | 🐍 CLI / 🌐 Portal |
+| 2 | [Step 1: Install Required Tools](#step-1-install-required-tools) | 🐍/#️⃣ CLI |
+| 3 | [Step 2: Create Project Directory](#step-2-create-project-directory) | 🐍/#️⃣ CLI |
+| 4 | [Step 3: Install Packages](#step-3-install-packages) | 🐍/#️⃣ CLI |
+| 5 | [Step 4: Configure Environment Variables](#step-4-configure-environment-variables) | 🐍/#️⃣ CLI / 🌐 Portal |
 | 6 | [First API Call — Portal Option](#-option-a-first-api-call-in-the-playground-no-code) | 🌐 Portal |
-| 7 | [First API Call — Code Option](#-option-b-first-api-call-with-code) | 🐍 Code |
+| 7 | [First API Call — Code Option](#-️-net--option-b-first-api-call-with-code) | 🐍/.NET Code |
 | 8 | [Azure CLI for Foundry](#️-azure-cli-for-foundry) | 🐍 CLI |
 | 9 | [Authentication Methods Comparison](#-authentication-methods-comparison) | Reference |
 
@@ -57,6 +50,10 @@ Azure AI Foundry provides multiple SDKs for different scenarios:
 
 ### Step 1: Install Required Tools
 
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
+
 ```bash
 # Verify Python version (need 3.11+)
 python --version
@@ -71,7 +68,32 @@ az login
 az account set --subscription "<your-subscription-id>"
 ```
 
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```bash
+# Verify .NET SDK version (need 8.0+)
+dotnet --version
+
+# Verify Azure CLI
+az --version
+
+# Login to Azure
+az login
+
+# Set your subscription (if multiple)
+az account set --subscription "<your-subscription-id>"
+```
+
+</div>
+</div>
+
 ### Step 2: Create Project Directory
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 ```bash
 mkdir hackathon-foundry && cd hackathon-foundry
@@ -84,13 +106,51 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### Step 3: Install Python Packages
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```bash
+mkdir hackathon-foundry && cd hackathon-foundry
+dotnet new console -n HackathonFoundry
+cd HackathonFoundry
+```
+
+> The `dotnet new console` template targets the SDK you have installed. Make sure
+> your `.csproj` sets `<TargetFramework>net8.0</TargetFramework>` (see the sample
+> projects under `sample-code/dotnet/` in this repo for working examples).
+
+</div>
+</div>
+
+### Step 3: Install Packages
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 ```bash
 pip install azure-ai-projects azure-identity openai python-dotenv
 pip install azure-search-documents azure-storage-blob
 pip install streamlit pandas
 ```
+
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```bash
+dotnet add package OpenAI --version 2.12.0
+dotnet add package Azure.Identity --version 1.21.0
+```
+
+> These are the two packages used throughout the .NET samples in this hackathon:
+> the official `OpenAI` client (talking directly to the Azure AI Foundry `/openai/v1`
+> endpoint) and `Azure.Identity` for Entra ID authentication (`DefaultAzureCredential`).
+> No `Azure.AI.OpenAI` wrapper package and no API keys are required.
+
+</div>
+</div>
 
 ### Step 4: Configure Environment Variables
 
@@ -108,14 +168,21 @@ PROJECT_ENDPOINT=https://your-resource.services.ai.azure.com/api/projects/your-p
 
 # From Azure OpenAI resource > Keys and Endpoint
 AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
-AZURE_OPENAI_API_KEY=your-key-here
 AZURE_OPENAI_DEPLOYMENT=gpt-5.1
 ```
 
 > 💡 **Where to find these values:**
 > - **Project Endpoint**: Foundry Portal → Your Project → Overview → "Project endpoint"
-> - **OpenAI Endpoint/Key**: Azure Portal → Your OpenAI resource → Keys and Endpoint
+> - **OpenAI Endpoint**: Azure Portal → Your OpenAI resource → Keys and Endpoint
 > - **Deployment name**: Foundry Portal → Deployments → Name column
+>
+> Every sample in this hackathon (Python and .NET) authenticates with Microsoft Entra ID
+> (`DefaultAzureCredential`) instead of an API key, so you will **not** set
+> `AZURE_OPENAI_API_KEY` — the `az login` session from Step 1 is all you need.
+> **.NET note:** console apps read these as OS process environment variables via
+> `Environment.GetEnvironmentVariable(...)`, not from the `.env` file directly. Either
+> `export`/`set` the values in your shell before `dotnet run`, or add a small `.env`
+> loader package (e.g. `dotenv.net`) if you want file-based config like the Python samples.
 
 ---
 
@@ -127,7 +194,7 @@ AZURE_OPENAI_DEPLOYMENT=gpt-5.1
 
 1. Go to [ai.azure.com](https://ai.azure.com) → your project
 2. Click **Playgrounds** → **Chat**
-3. Select your deployed model (e.g., **GPT-4.1** or **GPT-4.1-mini**)
+3. Select your deployed model (e.g., **GPT-5.1** or **GPT-5-mini**)
 4. In the **System message** box, type:
    ```
    You are a helpful assistant.
@@ -137,50 +204,65 @@ AZURE_OPENAI_DEPLOYMENT=gpt-5.1
    What is Azure AI Foundry? Explain in 2 sentences.
    ```
 6. Press **Send** and observe the response
-7. On the right panel, note the **token usage** — this is what you'll be billed for
+7. Note the **token usage** — this is what you'll be billed for
 8. Try adjusting:
-   - **Temperature**: `0.0` vs `1.0` — notice the difference in creativity
-   - **Max response**: Set to `50` — see how the response gets cut short
-   - **Top-P**: `0.1` for very focused output
+   - **Max Completion response**: Set to `50` — see how the response gets cut short   
 
 > ✅ If you see a response, your Foundry setup is working! You can proceed with either portal or code path from here.
 
 ---
 
-### 🐍 Option B: First API Call with Code
+### 🐍 / .NET — Option B: First API Call with Code
 
-### Step 5: Hello Foundry — Using the OpenAI SDK
+### Step 5: Hello Foundry — Using the OpenAI v1 API + Entra ID
+
+Both languages below call the same Azure AI Foundry OpenAI **v1** endpoint
+(`{AZURE_OPENAI_ENDPOINT}/openai/v1`) and authenticate with Microsoft Entra ID via
+`DefaultAzureCredential` — **no API key is used anywhere**. GPT-5.1 is a reasoning
+model, so the calls use `max_completion_tokens` (not `max_tokens`) and omit
+`temperature` entirely (GPT-5.1 does not support it).
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 Create `01_hello_foundry.py`:
 
 ```python
 import os
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from openai import OpenAI
 
 load_dotenv()
 
-# Initialize the client
-client = AzureOpenAI(
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2024-12-01-preview"
+endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
+
+# Microsoft Entra ID authentication -- no API key needed.
+token_provider = get_bearer_token_provider(
+    DefaultAzureCredential(), "https://ai.azure.com/.default"
 )
 
-# Make a chat completion call
+# Plain OpenAI client pointed at the Foundry resource's v1 endpoint.
+client = OpenAI(
+    base_url=f"{endpoint.rstrip('/')}/openai/v1",
+    api_key=token_provider,
+)
+
+# GPT-5.1 is a reasoning model: no `temperature`, use `max_completion_tokens`.
 response = client.chat.completions.create(
-    model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),  # Your deployment name
+    model=deployment,  # Your deployment name
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": "What is Azure AI Foundry? Explain in 2 sentences."}
     ],
-    temperature=0.7,
-    max_tokens=200
+    max_completion_tokens=200
 )
 
-print("✅ Response from Azure AI Foundry:")
+print("Response from Azure AI Foundry:")
 print(response.choices[0].message.content)
-print(f"\n📊 Tokens used: {response.usage.total_tokens}")
+print(f"\nTokens used: {response.usage.total_tokens}")
 ```
 
 Run it:
@@ -188,28 +270,63 @@ Run it:
 python 01_hello_foundry.py
 ```
 
-### Step 6: Using Entra ID Authentication (Recommended for Production)
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
 
-```python
-import os
-from dotenv import load_dotenv
-from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
+`Program.cs` (see `sample-code/dotnet/01-hello-foundry/` for the full project):
 
-load_dotenv()
+```csharp
+using Azure.Identity;
+using OpenAI;
+using OpenAI.Chat;
+using System.ClientModel.Primitives;
 
-# Use Entra ID — no API keys needed!
-credential = DefaultAzureCredential()
-client = AIProjectClient(
-    endpoint=os.getenv("PROJECT_ENDPOINT"),
-    credential=credential
-)
+// BearerTokenPolicy is currently marked [Experimental("OPENAI001")] in the OpenAI SDK.
+#pragma warning disable OPENAI001
 
-# List available model deployments
-print("📋 Available deployments in your project:")
-for deployment in client.deployments.list():
-    print(f"  - {deployment.name} ({deployment.model})")
+string endpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")
+    ?? throw new InvalidOperationException("Set AZURE_OPENAI_ENDPOINT.");
+string deployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT") ?? "gpt-5.1";
+
+// Microsoft Entra ID authentication -- no API key needed.
+BearerTokenPolicy tokenPolicy = new(
+    new DefaultAzureCredential(),
+    "https://ai.azure.com/.default");
+
+ChatClient client = new(
+    model: deployment,
+    authenticationPolicy: tokenPolicy,
+    options: new OpenAIClientOptions
+    {
+        Endpoint = new Uri($"{endpoint.TrimEnd('/')}/openai/v1/")
+    });
+
+// GPT-5.1 is a reasoning model: no `Temperature`, use `MaxOutputTokenCount`.
+ChatCompletionOptions options = new()
+{
+    MaxOutputTokenCount = 200
+};
+
+ChatCompletion completion = client.CompleteChat(
+    [
+        new SystemChatMessage("You are a helpful assistant."),
+        new UserChatMessage("What is Azure AI Foundry? Explain in 2 sentences.")
+    ],
+    options);
+
+Console.WriteLine("Response from Azure AI Foundry:");
+Console.WriteLine(completion.Content[0].Text);
+Console.WriteLine($"\nTokens used: {completion.Usage.TotalTokenCount}");
 ```
+
+Run it:
+```bash
+dotnet run
+```
+
+</div>
+</div>
 
 ---
 
@@ -260,12 +377,11 @@ az cognitiveservices account deployment create \
 ## ✅ Checkpoint
 
 Before moving to the next lab, confirm:
-- [ ] Python environment is set up with all packages installed
-- [ ] `.env` file is configured with your endpoints and keys
-- [ ] You can successfully run `01_hello_foundry.py` and get a response
+- [ ] Your Python or .NET environment is set up with all packages installed
+- [ ] `.env` file is configured with your endpoints (no API key needed)
+- [ ] You can successfully run the Hello Foundry sample and get a response
 - [ ] You understand the difference between API key and Entra ID auth
 
 ---
 
 **Next:** [Lab 3 — Models & Agents →](03-models-and-agents.md)
-

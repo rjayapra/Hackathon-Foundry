@@ -1,10 +1,3 @@
----
-layout: lab
-title: "Lab 3: Models & Agents"
-prev_lab: /labs/02-tooling-setup
-next_lab: /labs/04-rag
----
-
 # Lab 3: Model Usage & Agents
 
 ## 🎯 Learning Objectives
@@ -22,8 +15,8 @@ By the end of this lab, you will:
 | # | Exercise | Type |
 |---|----------|------|
 | 1 | [Model Catalog Overview](#model-catalog-overview) | Concepts |
-| 2 | [Exercise 1: Experiment with Temperature](#exercise-1-experiment-with-temperature) | 🌐 Portal / 🐍 Code |
-| 3 | [Exercise 2: Streaming Responses](#exercise-2-streaming-responses) | 🌐 Portal / 🐍 Code |
+| 2 | [Exercise 1: Experiment with Reasoning Effort](#exercise-1-experiment-with-reasoning-effort) | 🌐 Portal / 🐍 Code |
+| 3 | [Exercise 2: Streaming Responses](#exercise-2-streaming-responses) | 🐍 API |
 | 4 | [What is an Agent?](#what-is-an-agent) | Concepts |
 | 5 | [Build Your First Agent — Portal](#-option-a-create-an-agent-via-the-foundry-portal-no-code) | 🌐 Portal |
 | 6 | [Build Your First Agent — Code](#-option-b-create-an-agent-via-python-sdk) | 🐍 Code |
@@ -56,39 +49,42 @@ By the end of this lab, you will:
 ### Choosing a Model — Decision Matrix
 
 ```
-Need complex reasoning/coding?  → GPT-4.1
-Need it cheap & fast?           → GPT-4.1-mini or GPT-4.1-nano
+Need complex reasoning/coding?  → GPT-5.1
+Need it cheap & fast?           → GPT-5-mini 
 Need multimodal (vision+audio)? → gpt-5.1
-Need deep math/logic reasoning? → o3 or o4-mini
+Need deep math/logic reasoning? → o4-mini
 Need image generation?          → gpt-image-1
 Need embeddings for RAG?        → text-embedding-3-large (quality) or 3-small (cost)
-Need code generation?           → GPT-4.1 (1M context, best for code)
-Need diagram/visual?            → GPT-4.1 (Mermaid/PlantUML) + gpt-image-1
-Need long documents (>128K)?    → GPT-4.1 (1M token context)
+Need code generation?           → GPT-5-codex (1M context, best for code)
+Need diagram/visual?            → GPT-5.1 (Mermaid/PlantUML) + gpt-image-1
+Need long documents (>128K)?    → GPT-5.1 (1M token context)
 ```
 
 ---
 
 ## 🖥️ Hands-On: API Parameters Deep Dive
 
-### Exercise 1: Experiment with Temperature
+### Exercise 1: Experiment with Reasoning Effort
+
+> ⚠️ **GPT-5.1 does not support the `temperature` parameter.** Use `reasoning_effort` to control how much reasoning the model performs before answering.
 
 #### 🌐 Portal Option
 
 1. Go to [ai.azure.com](https://ai.azure.com) → your project → **Playgrounds** → **Chat**
-2. Select your **GPT-4.1** deployment
-3. In the chat, type: *"Write a one-line tagline for an AI hackathon."*
-4. On the right panel, set **Temperature** to `0.0` → press Send
-5. **Clear chat**, ask the same question with Temperature `0.5` → Send
-6. **Clear chat**, ask the same question with Temperature `1.0` → Send
-7. Compare the three responses — notice how higher temperature = more creative/varied output
+2. Select your **GPT-5.1** deployment
+3. In the chat, type: *"A team has 8 hours to build an AI prototype. Prioritize these tasks and explain the tradeoffs: data preparation, prompt design, evaluation, UI, and deployment."*
+4. On the right panel, set **Reasoning effort** to `none` → press Send
+5. **Clear chat**, ask the same question with Reasoning effort `low` → Send
+6. **Clear chat**, ask the same question with Reasoning effort `high` → Send
+7. Compare the responses, response times, and token usage
 
-> 💡 **Key insight**: Temperature `0.0` gives the same answer every time. Temperature `1.0` is different each time.
+> 💡 **Key insight**: Higher reasoning effort can improve analysis on complex tasks, but it can also increase latency and token usage. Use the lowest effort that consistently meets your quality requirements.
 
 #### 🐍 Code Option
 
 ```python
 import os
+import time
 from dotenv import load_dotenv
 from openai import AzureOpenAI
 
@@ -100,32 +96,32 @@ client = AzureOpenAI(
     api_version="2025-04-01-preview"
 )
 
-prompt = "Write a one-line tagline for an AI hackathon."
+prompt = """A team has 8 hours to build an AI prototype. Prioritize these tasks
+and explain the tradeoffs: data preparation, prompt design, evaluation, UI,
+and deployment."""
 
-# Try different temperatures
-for temp in [0.0, 0.5, 1.0]:
+# Try different reasoning effort levels supported by GPT-5.1
+for effort in ["none", "low", "high"]:
+    start = time.perf_counter()
     response = client.chat.completions.create(
         model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
         messages=[{"role": "user", "content": prompt}],
-        temperature=temp,
-        max_tokens=50
+        reasoning_effort=effort,
+        max_completion_tokens=500
     )
-    print(f"Temperature {temp}: {response.choices[0].message.content}")
+    elapsed = time.perf_counter() - start
+
+    print(f"\nReasoning effort: {effort}")
+    print(f"Elapsed time: {elapsed:.2f} seconds")
+    print(f"Token usage: {response.usage}")
+    print(response.choices[0].message.content)
 ```
 
 ### Exercise 2: Streaming Responses
 
-#### 🌐 Portal Option
+> ⚠️ **Streaming is an API feature and is not available as an option in the Foundry playground.** Complete this exercise with the Python API.
 
-1. In the **Chat Playground**, the Foundry portal streams responses by default!
-2. Ask a longer question: *"Explain microservices architecture in 5 bullet points."*
-3. Watch the tokens appear one by one — this is streaming in action
-4. In a real application, streaming gives users faster perceived response times
-5. Toggle **Stream response** in the settings panel to compare streaming vs. non-streaming
-
-> 💡 **Key insight**: Streaming shows partial results immediately. Without streaming, users wait for the full response.
-
-#### 🐍 Code Option
+#### 🐍 Python API
 
 ```python
 # Streaming — get tokens as they're generated (great for chat UIs)
@@ -144,6 +140,14 @@ for chunk in stream:
         print(chunk.choices[0].delta.content, end="", flush=True)
 print()
 ```
+
+1. Run the code and observe that text appears incrementally instead of all at once.
+2. Change `stream=True` to `stream=False`. Update the code to print
+   `response.choices[0].message.content`, then run it again.
+3. Compare the perceived response time. With streaming, the application can display
+   content before the complete response is ready.
+
+> 💡 **Key insight**: The API returns an iterator of response chunks when `stream=True`. Production applications can forward those chunks to a UI as they arrive.
 
 ---
 
@@ -512,7 +516,7 @@ advisor_agent = client.agents.create_agent(
 ## ✅ Checkpoint
 
 Before moving to the next lab, confirm:
-- [ ] You can make API calls with different parameters (temperature, streaming)
+- [ ] You can make API calls with different parameters (reasoning effort, streaming)
 - [ ] You've created and interacted with an agent
 - [ ] You understand tool calling (code interpreter)
 - [ ] You can generate architecture diagrams using GPT-4.1 (Mermaid)
@@ -521,4 +525,3 @@ Before moving to the next lab, confirm:
 ---
 
 **Next:** [Lab 4 — RAG (Retrieval-Augmented Generation) →](04-rag.md)
-

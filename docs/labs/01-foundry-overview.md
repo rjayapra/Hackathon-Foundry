@@ -1,10 +1,3 @@
----
-layout: lab
-title: "Lab 1: Foundry Overview"
-prev_lab: /
-next_lab: /labs/02-tooling-setup
----
-
 # Lab 1: Azure AI Foundry Overview
 
 ## 🎯 Learning Objectives
@@ -115,15 +108,15 @@ Models from the catalog are deployed as **endpoints** you can call via API:
 4. Click **Create**
 
 ### Step 4: Deploy a Model
-1. Inside your project, go to **Deployments**
-2. Click **+ Deploy model** → **Deploy base model**
+1. Inside your project, go to **Build** -> **Models**
+2. Under **Deployments**  Click **Deploy base model**
 3. Select **gpt-5.1** (or gpt-5.1-mini for cost savings)
-4. Choose deployment type: **Standard**
-5. Set tokens-per-minute (TPM) rate limit (start with 10K for hackathon)
-6. Click **Deploy**
+4. Click **Deploy**
+5. Deploy with **Default Settings**
+
 
 ### Step 5: Test in the Playground
-1. Go to **Playgrounds** → **Chat**
+1. Select the model and go to **Playgrounds** → **Chat**
 2. Select your deployed model
 3. Try a prompt:
    ```
@@ -131,8 +124,7 @@ Models from the catalog are deployed as **endpoints** you can call via API:
    ```
 4. Experiment with:
    - **System message** (persona/instructions)
-   - **Temperature** (creativity: 0 = deterministic, 1 = creative)
-   - **Max tokens** (response length limit)
+   - **Max Completion tokens** (response length limit)
 
 ---
 
@@ -168,4 +160,3 @@ Before moving to the next lab, confirm:
 ---
 
 **Next:** [Lab 2 — Tooling & Setup →](02-tooling-setup.md)
-
