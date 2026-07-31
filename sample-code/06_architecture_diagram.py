@@ -1,21 +1,39 @@
 """
 06_architecture_diagram.py - Generate Architecture Diagrams with AI
 Lab 3: Models & Agents - Diagram Generation
+
+Uses the Azure AI Foundry OpenAI v1 endpoint with Microsoft Entra ID
+authentication (DefaultAzureCredential) -- no API key is used or required.
+GPT-5.1 is a reasoning model and does not support `temperature`.
 """
 
 import os
+import sys
+
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from openai import OpenAI
 
 load_dotenv()
 
-client = AzureOpenAI(
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version="2024-12-01-preview"
+ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
+DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
+
+if not ENDPOINT:
+    sys.exit(
+        "ERROR: AZURE_OPENAI_ENDPOINT is not set. Copy .env.template to .env "
+        "and fill in your values (see Lab 2)."
+    )
+
+# Microsoft Entra ID authentication -- no API key needed.
+token_provider = get_bearer_token_provider(
+    DefaultAzureCredential(), "https://ai.azure.com/.default"
 )
 
-DEPLOYMENT = os.getenv("AZURE_OPENAI_DEPLOYMENT", "gpt-5.1")
+client = OpenAI(
+    base_url=f"{ENDPOINT.rstrip('/')}/openai/v1",
+    api_key=token_provider,
+)
 
 
 def generate_mermaid_diagram(description: str) -> str:
@@ -35,8 +53,7 @@ def generate_mermaid_diagram(description: str) -> str:
             - Output ONLY the Mermaid code, no explanation
             """},
             {"role": "user", "content": description}
-        ],
-        temperature=0.3
+        ]
     )
     return response.choices[0].message.content
 
@@ -57,8 +74,7 @@ def generate_plantuml_diagram(description: str) -> str:
             - Output ONLY the PlantUML code, no explanation
             """},
             {"role": "user", "content": description}
-        ],
-        temperature=0.3
+        ]
     )
     return response.choices[0].message.content
 

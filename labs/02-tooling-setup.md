@@ -15,10 +15,10 @@ By the end of this lab, you will:
 | # | Exercise | Type |
 |---|----------|------|
 | 1 | [SDK Ecosystem Overview](#sdk-ecosystem-overview) | Concepts |
-| 2 | [Step 1: Install Required Tools](#step-1-install-required-tools) | 🐍/#️⃣ CLI |
-| 3 | [Step 2: Create Project Directory](#step-2-create-project-directory) | 🐍/#️⃣ CLI |
-| 4 | [Step 3: Install Packages](#step-3-install-packages) | 🐍/#️⃣ CLI |
-| 5 | [Step 4: Configure Environment Variables](#step-4-configure-environment-variables) | 🐍/#️⃣ CLI / 🌐 Portal |
+| 2 | [Step 1: Install Required Tools](#step-1-install-required-tools) | 🐍/.NET CLI |
+| 3 | [Step 2: Create Project Directory](#step-2-create-project-directory) | 🐍/.NET CLI |
+| 4 | [Step 3: Install Packages](#step-3-install-packages) | 🐍/.NET CLI |
+| 5 | [Step 4: Configure Environment Variables](#step-4-configure-environment-variables) | 🐍/.NET CLI / 🌐 Portal |
 | 6 | [First API Call — Portal Option](#-option-a-first-api-call-in-the-playground-no-code) | 🌐 Portal |
 | 7 | [First API Call — Code Option](#-️-net--option-b-first-api-call-with-code) | 🐍/.NET Code |
 | 8 | [Azure CLI for Foundry](#️-azure-cli-for-foundry) | 🐍 CLI |

@@ -5,6 +5,65 @@ layout: default
 <style>
   .nav-links { margin-bottom: 2em; }
   .nav-links a { margin-right: 1em; font-size: 0.9em; }
+
+  .language-tabs {
+    margin: 1.5rem 0;
+  }
+
+  .language-tab-list {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid #d0d7de;
+  }
+
+  .language-tab-button {
+    padding: 0.65rem 1rem;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 0.4rem 0.4rem 0 0;
+    background: transparent;
+    color: #57606a;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+  }
+
+  .language-tab-button:hover,
+  .language-tab-button:focus-visible {
+    color: #0969da;
+  }
+
+  .language-tab-button[aria-selected="true"] {
+    margin-bottom: -1px;
+    border-color: #d0d7de;
+    border-bottom-color: #ffffff;
+    background: #ffffff;
+    color: #24292f;
+  }
+
+  .language-tabs-ready .language-tab-panel {
+    padding: 1rem;
+    border: 1px solid #d0d7de;
+    border-top: 0;
+    border-radius: 0 0 0.4rem 0.4rem;
+  }
+
+  .language-tabs-ready .language-tab-panel[hidden] {
+    display: none;
+  }
+
+  .language-tabs-ready .language-tab-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
 </style>
 
 <div class="nav-links">
@@ -12,6 +71,100 @@ layout: default
   {% if page.prev_lab %}<a href="{{ page.prev_lab | relative_url }}">← Previous Lab</a>{% endif %}
   {% if page.next_lab %}<a href="{{ page.next_lab | relative_url }}" style="float:right">Next Lab →</a>{% endif %}
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const storageKey = "hackathon-language";
+    const groups = Array.from(document.querySelectorAll("[data-language-tabs]"));
+    let selectedLanguage = localStorage.getItem(storageKey) || "python";
+
+    const activate = (language, focusButton = false) => {
+      selectedLanguage = language;
+      localStorage.setItem(storageKey, language);
+
+      groups.forEach((group) => {
+        const matchingButton = group.querySelector(`[data-language-button="${language}"]`);
+        if (!matchingButton) {
+          return;
+        }
+
+        group.querySelectorAll("[data-language-button]").forEach((button) => {
+          const isSelected = button.dataset.languageButton === language;
+          button.setAttribute("aria-selected", String(isSelected));
+          button.tabIndex = isSelected ? 0 : -1;
+        });
+
+        group.querySelectorAll("[data-language-panel]").forEach((panel) => {
+          panel.hidden = panel.dataset.languagePanel !== language;
+        });
+
+        if (focusButton) {
+          matchingButton.focus();
+        }
+      });
+    };
+
+    groups.forEach((group, groupIndex) => {
+      const panels = Array.from(group.querySelectorAll(":scope > .language-tab-panel"));
+      if (panels.length < 2) {
+        return;
+      }
+
+      const tabList = document.createElement("div");
+      tabList.className = "language-tab-list";
+      tabList.setAttribute("role", "tablist");
+      tabList.setAttribute("aria-label", "Programming language");
+
+      panels.forEach((panel, panelIndex) => {
+        const language = panel.dataset.languageId;
+        const label = panel.dataset.language;
+        const panelId = `language-panel-${groupIndex}-${panelIndex}`;
+        const buttonId = `language-tab-${groupIndex}-${panelIndex}`;
+
+        panel.id = panelId;
+        panel.dataset.languagePanel = language;
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", buttonId);
+
+        const button = document.createElement("button");
+        button.id = buttonId;
+        button.className = "language-tab-button";
+        button.type = "button";
+        button.textContent = label;
+        button.dataset.languageButton = language;
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-controls", panelId);
+        button.addEventListener("click", () => activate(language));
+        button.addEventListener("keydown", (event) => {
+          const buttons = Array.from(tabList.querySelectorAll("[data-language-button]"));
+          const currentIndex = buttons.indexOf(event.currentTarget);
+          let nextIndex;
+
+          if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % buttons.length;
+          if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+          if (event.key === "Home") nextIndex = 0;
+          if (event.key === "End") nextIndex = buttons.length - 1;
+
+          if (nextIndex !== undefined) {
+            event.preventDefault();
+            activate(buttons[nextIndex].dataset.languageButton, true);
+          }
+        });
+        tabList.appendChild(button);
+      });
+
+      group.prepend(tabList);
+      group.classList.add("language-tabs-ready");
+    });
+
+    const availableLanguages = new Set(
+      groups.flatMap((group) =>
+        Array.from(group.querySelectorAll("[data-language-id]"), (panel) => panel.dataset.languageId)
+      )
+    );
+    activate(availableLanguages.has(selectedLanguage) ? selectedLanguage : "python");
+  });
+</script>
 
 {{ content }}
 

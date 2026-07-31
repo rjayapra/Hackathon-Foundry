@@ -180,7 +180,7 @@ integrated vectorization.
 
 ---
 
-### 🐍 Option B: Build RAG with Python (Code-First)
+### 🐍 / .NET Option B: Build RAG with Code (Code-First)
 
 > For developers who want full control over the RAG pipeline.
 
@@ -226,10 +226,28 @@ Return Policy:
 Install current packages, sign in with Azure CLI, and use Microsoft Entra ID rather
 than storing service keys:
 
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
+
 ```powershell
 pip install --upgrade openai azure-identity azure-search-documents python-dotenv
 az login
 ```
+
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```powershell
+dotnet add package OpenAI --version 2.12.0
+dotnet add package Azure.Identity --version 1.21.0
+dotnet add package Azure.Search.Documents --version 12.0.0
+az login
+```
+
+</div>
+</div>
 
 Your identity needs **Cognitive Services OpenAI User** for model inference and
 appropriate Azure AI Search data-plane roles to create the index, upload documents,
@@ -250,6 +268,10 @@ AZURE_SEARCH_INDEX=hackathon-vector-index
 The code uses the
 [Azure OpenAI v1 API](https://learn.microsoft.com/azure/ai-foundry/openai/api-version-lifecycle),
 which doesn't require a dated `api-version`.
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 ```python
 import os
@@ -363,11 +385,112 @@ index_client.create_or_update_index(index=index)
 print(f"✅ Index '{INDEX_NAME}' created/updated")
 ```
 
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```csharp
+using Azure;
+using Azure.Identity;
+using Azure.Search.Documents;
+using Azure.Search.Documents.Indexes;
+using Azure.Search.Documents.Indexes.Models;
+using Azure.Search.Documents.Models;
+using OpenAI;
+using OpenAI.Chat;
+using OpenAI.Embeddings;
+using System.ClientModel.Primitives;
+
+// BearerTokenPolicy-based authentication is currently marked [Experimental("OPENAI001")]
+// in the OpenAI .NET SDK. All the usings above are shared by Steps 2-5 below --
+// they must stay together at the top of Program.cs.
+#pragma warning disable OPENAI001
+
+// --- Configuration ---
+string searchEndpoint = Environment.GetEnvironmentVariable("AZURE_SEARCH_ENDPOINT")
+    ?? throw new InvalidOperationException("AZURE_SEARCH_ENDPOINT is not set.");
+string indexName = Environment.GetEnvironmentVariable("AZURE_SEARCH_INDEX") ?? "hackathon-vector-index";
+string openAiEndpoint = (Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT")
+    ?? throw new InvalidOperationException("AZURE_OPENAI_ENDPOINT is not set.")).TrimEnd('/');
+string chatDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT") ?? "gpt-5.1";
+string embeddingDeployment = Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DEPLOYMENT") ?? "text-embedding-3-small";
+int embeddingDimensions = int.Parse(Environment.GetEnvironmentVariable("AZURE_OPENAI_EMBEDDING_DIMENSIONS") ?? "1536");
+
+// Microsoft Entra ID authentication -- no API keys anywhere in this pipeline.
+DefaultAzureCredential credential = new();
+BearerTokenPolicy tokenPolicy = new(credential, "https://ai.azure.com/.default");
+Uri openAiV1Endpoint = new($"{openAiEndpoint}/openai/v1/");
+
+ChatClient chatClient = new(
+    model: chatDeployment,
+    authenticationPolicy: tokenPolicy,
+    options: new OpenAIClientOptions { Endpoint = openAiV1Endpoint });
+
+EmbeddingClient embeddingClient = new(
+    model: embeddingDeployment,
+    authenticationPolicy: tokenPolicy,
+    options: new OpenAIClientOptions { Endpoint = openAiV1Endpoint });
+
+// --- Step 2a: Create the Search Index ---
+SearchIndexClient indexClient = new(new Uri(searchEndpoint), credential);
+
+// Define index schema with a vector field for embeddings
+List<SearchField> fields =
+[
+    new SimpleField("id", SearchFieldDataType.String) { IsKey = true },
+    new SearchableField("content"),
+    new SearchableField("title") { IsFilterable = true },
+    new SimpleField("category", SearchFieldDataType.String) { IsFilterable = true, IsFacetable = true },
+    new VectorSearchField("content_vector", embeddingDimensions, "myHnswProfile") { IsHidden = true },
+];
+
+// Configure vector search
+VectorSearch vectorSearch = new()
+{
+    Algorithms = { new HnswAlgorithmConfiguration("myHnsw") },
+    Profiles = { new VectorSearchProfile("myHnswProfile", "myHnsw") },
+};
+
+// Configure semantic ranking for hybrid queries
+SemanticConfiguration semanticConfig = new(
+    name: "my-semantic-config",
+    prioritizedFields: new SemanticPrioritizedFields
+    {
+        TitleField = new SemanticField("title"),
+        ContentFields = { new SemanticField("content") },
+    });
+SemanticSearch semanticSearch = new()
+{
+    Configurations = { semanticConfig },
+};
+
+// Create the index
+SearchIndex index = new(indexName)
+{
+    Fields = fields,
+    VectorSearch = vectorSearch,
+    SemanticSearch = semanticSearch,
+};
+
+await indexClient.CreateOrUpdateIndexAsync(index);
+Console.WriteLine($"Index '{indexName}' created/updated");
+```
+
+> `VectorSearchField` fails explicitly at index-creation time on the server if
+> `embeddingDimensions` doesn't match your embedding deployment's actual output size.
+
+</div>
+</div>
+
 > `text-embedding-3-small` produces up to 1,536 dimensions and
 > `text-embedding-3-large` produces up to 3,072. The index field dimension must
 > exactly match the dimension returned by your embedding deployment.
 
 ### Step 3: Chunk Documents and Generate Embeddings
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 ```python
 def chunk_text(text, chunk_size_words=400, overlap_words=80):
@@ -414,7 +537,72 @@ for filepath in Path("data/sample-docs").glob("*.txt"):
 print(f"\n✅ Total chunks to index: {len(documents)}")
 ```
 
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```csharp
+List<string> ChunkText(string text, int chunkSizeWords = 400, int overlapWords = 80)
+{
+    // Split text into overlapping word-based chunks for this lab.
+    string[] words = text.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+    List<string> chunks = [];
+    int step = chunkSizeWords - overlapWords;
+    for (int i = 0; i < words.Length; i += step)
+    {
+        string chunk = string.Join(' ', words.Skip(i).Take(chunkSizeWords));
+        if (!string.IsNullOrWhiteSpace(chunk))
+        {
+            chunks.Add(chunk);
+        }
+    }
+    return chunks;
+}
+
+ReadOnlyMemory<float> GetEmbedding(string text)
+{
+    // Generate embedding for a text chunk.
+    EmbeddingGenerationOptions options = new() { Dimensions = embeddingDimensions };
+    OpenAIEmbedding embedding = embeddingClient.GenerateEmbedding(text, options);
+    return embedding.ToFloats();
+}
+
+// Process all documents
+List<SearchDocument> documents = [];
+int docId = 0;
+
+foreach (string filepath in Directory.GetFiles("data/sample-docs", "*.txt"))
+{
+    string content = File.ReadAllText(filepath);
+    string filename = Path.GetFileName(filepath);
+
+    foreach (string chunk in ChunkText(content))
+    {
+        ReadOnlyMemory<float> embedding = GetEmbedding(chunk);
+        documents.Add(new SearchDocument
+        {
+            ["id"] = docId.ToString(),
+            ["title"] = filename,
+            ["category"] = Path.GetFileNameWithoutExtension(filepath),
+            ["content"] = chunk,
+            ["content_vector"] = embedding.ToArray(),
+        });
+        docId++;
+        Console.WriteLine($"  Processed chunk {docId} from {filename}");
+    }
+}
+
+Console.WriteLine($"\nTotal chunks to index: {documents.Count}");
+```
+
+</div>
+</div>
+
 ### Step 4: Upload to Azure AI Search
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 ```python
 # Upload documents to the search index
@@ -433,7 +621,37 @@ if failures:
 print(f"✅ Uploaded {len(result)} documents to index '{INDEX_NAME}'")
 ```
 
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```csharp
+// Upload documents to the search index
+SearchClient searchClient = new(new Uri(searchEndpoint), indexName, credential);
+
+Response<IndexDocumentsResult> uploadResponse = await searchClient.UploadDocumentsAsync(documents);
+
+// Validate every individual result -- a batch call can partially fail
+// even when the overall request succeeds. Fail explicitly rather than
+// silently dropping documents.
+List<IndexingResult> failures = uploadResponse.Value.Results.Where(r => !r.Succeeded).ToList();
+if (failures.Count > 0)
+{
+    string details = string.Join("; ", failures.Select(f => $"{f.Key}: {f.ErrorMessage}"));
+    throw new InvalidOperationException($"Failed to upload search documents: {details}");
+}
+
+Console.WriteLine($"Uploaded {uploadResponse.Value.Results.Count} documents to index '{indexName}'");
+```
+
+</div>
+</div>
+
 ### Step 5: Query with RAG
+
+<div class="language-tabs" data-language-tabs markdown="1">
+<div class="language-tab-panel" data-language="Python" data-language-id="python" markdown="1">
+<p class="language-tab-label"><strong>Python</strong></p>
 
 ```python
 from azure.search.documents.models import VectorizedQuery
@@ -505,6 +723,106 @@ for q in questions:
     print(f"✅ Answer: {answer}")
     print("-" * 60)
 ```
+
+</div>
+<div class="language-tab-panel" data-language=".NET" data-language-id="dotnet" markdown="1">
+<p class="language-tab-label"><strong>.NET</strong></p>
+
+```csharp
+async Task<string> RagQueryAsync(string question)
+{
+    // Step 1: Embed the question
+    ReadOnlyMemory<float> questionEmbedding = GetEmbedding(question);
+
+    // Step 2: Search the index (hybrid: keyword + vector), reranked with semantic search
+    SearchOptions searchOptions = new()
+    {
+        VectorSearch = new()
+        {
+            Queries =
+            {
+                new VectorizedQuery(questionEmbedding)
+                {
+                    KNearestNeighborsCount = 50,
+                    Fields = { "content_vector" },
+                },
+            },
+        },
+        SemanticSearch = new SemanticSearchOptions { SemanticConfigurationName = "my-semantic-config" },
+        QueryType = SearchQueryType.Semantic,
+        Select = { "id", "title", "category", "content" },
+        Size = 5,
+    };
+
+    SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>(question, searchOptions);
+
+    // Step 3: Collect retrieved context with source labels
+    List<string> contextParts = [];
+    int rank = 0;
+    Console.WriteLine("\nRetrieved documents:");
+    await foreach (SearchResult<SearchDocument> result in results.GetResultsAsync())
+    {
+        rank++;
+        string sourceId = $"S{rank}";
+        string title = result.Document["title"]?.ToString() ?? "";
+        string content = result.Document["content"]?.ToString() ?? "";
+        contextParts.Add($"[{sourceId}] Title: {title}\n{content}");
+
+        double score = result.SemanticSearch?.RerankerScore ?? result.Score ?? 0.0;
+        Console.WriteLine($"  [{sourceId}] {title} (score: {score:F2})");
+    }
+
+    string context = string.Join("\n\n---\n\n", contextParts);
+
+    // Step 4: Generate grounded answer
+    string instructions = $"""
+        Answer the user's question using only the provided context. Cite supporting
+        sources using their labels, such as [S1]. If the context doesn't contain the
+        answer, say "I don't have enough information to answer that."
+
+        Context:
+        {context}
+        """;
+
+    ChatCompletionOptions chatOptions = new()
+    {
+        ReasoningEffortLevel = ChatReasoningEffortLevel.Low,
+        MaxOutputTokenCount = 800,
+    };
+
+    ChatCompletion completion = chatClient.CompleteChat(
+        [
+            new DeveloperChatMessage(instructions),
+            new UserChatMessage(question),
+        ],
+        chatOptions);
+
+    return completion.Content[0].Text;
+}
+
+// Test it!
+string[] questions =
+[
+    "What is Contoso's return policy?",
+    "What support tiers are available?",
+    "Does the warranty cover accidental damage?",
+];
+
+foreach (string q in questions)
+{
+    Console.WriteLine($"\nQuestion: {q}");
+    string answer = await RagQueryAsync(q);
+    Console.WriteLine($"Answer: {answer}");
+    Console.WriteLine(new string('-', 60));
+}
+```
+
+> `KNearestNeighborsCount = 50` widens the initial vector recall set before hybrid
+> and semantic reranking narrow it down to `Size = 5` -- this mirrors the Python
+> `k_nearest_neighbors=50` / `top=5` pairing above.
+
+</div>
+</div>
 
 ---
 
